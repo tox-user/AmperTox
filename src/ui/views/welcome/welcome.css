@@ -1,0 +1,17 @@
+@import "../../global.css";
+
+.welcome
+{
+	text-align: center;
+}
+
+.title
+{
+	margin-bottom: 0;
+}
+
+.version
+{
+	color: var(--text-dark);
+	margin-top: 0;
+}

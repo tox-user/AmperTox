@@ -1,0 +1,303 @@
+@import "../../node_modules/@fortawesome/fontawesome-free/css/all.min.css";
+
+:root
+{
+	--primary: #1168c0;
+	--primary-light: #1672ce;
+	/* --primary: #1b83eb; */
+	/* --primary: #1e90ff; */
+	/* --secondary: rgb(133, 221, 98); */
+	--secondary: rgb(22, 156, 44);
+	--secondary-light: rgb(25, 168, 49);
+	--secondary-dark: rgb(18, 139, 39);
+	--warning: rgb(226, 197, 101);
+	--danger: rgb(216, 30, 24);
+	--text: rgba(255, 255, 255, 0.8);
+	--text-dark: rgba(255, 255, 255, 0.6);
+	--text-success: rgb(133, 221, 98);
+	--text-danger: rgb(231, 110, 88);
+	--offline: rgba(255, 255, 255, 0.5);
+	--background-alt: rgb(32, 29, 26);
+	--background: rgb(26, 23, 21);
+	/* --background-alt: rgb(36, 33, 28);
+	--background: rgb(26, 24, 19); */
+	--skeleton: rgb(58, 53, 45);
+	--modal-bg: rgb(27, 27, 27);
+	--modal-border: rgb(22, 22, 22);
+	/* --background: rgb(31, 29, 24); */
+}
+
+*
+{
+	box-sizing: border-box;
+}
+
+html, body
+{
+	height: 100vh;
+	padding: 0;
+	margin: 0;
+	overflow: hidden;
+}
+
+body
+{
+	background: var(--background);
+	color: var(--text);
+	font-size: 16px;
+	font-family: Arial, Helvetica, sans-serif;
+}
+
+button, textarea, input
+{
+	font-family: inherit;
+	font-size: inherit;
+}
+
+textarea, input
+{
+	border: solid 1px transparent;
+	outline: none;
+	background: rgba(0, 0, 0, 0.3);
+}
+
+textarea:focus, input:focus
+{
+	border-color: rgba(255, 255, 255, 0.3);
+	outline: none;
+}
+
+button, button:active
+{
+	outline: none;
+}
+
+ul
+{
+	list-style: none;
+	padding: 0;
+	margin: 0;
+}
+
+.btn
+{
+	padding: 8px 16px;
+	color: inherit;
+	border: transparent;
+	border-radius: 5px;
+	cursor: pointer;
+	outline: none;
+	background: transparent;
+}
+
+.btn:disabled
+{
+	opacity: 0.35;
+	pointer-events: none;
+}
+
+.btn:active
+{
+	outline: none;
+}
+
+.btn:hover
+{
+	color: rgba(255, 255, 255, 0.95);
+}
+
+.btn-alt
+{
+	background: transparent;
+	color: rgba(255, 255, 255, 0.7);
+}
+
+.btn-primary
+{
+	background: var(--primary);
+}
+
+.btn-primary:hover
+{
+	background: var(--primary-light);
+}
+
+.btn-primary:active
+{
+	background: var(--primary-light);
+}
+
+.btn-secondary
+{
+	background: var(--secondary);
+}
+
+.btn-secondary:hover
+{
+	background: var(--secondary-light);
+}
+
+.btn-secondary:active
+{
+	background: var(--secondary-dark);
+}
+
+.btn-danger
+{
+	background: var(--danger);
+}
+
+.btn-danger:hover
+{
+	background: var(--danger-light);
+}
+
+.btn-danger:active
+{
+	background: var(--danger-dark);
+}
+
+.primary
+{
+	background: var(--primary);
+}
+
+.secondary
+{
+	background: var(--secondary);
+}
+
+.text
+{
+	margin-left: 15px;
+}
+
+.text-primary
+{
+	color: var(--primary) !important;
+}
+
+.text-secondary
+{
+	color: var(--secondary) !important;
+}
+
+.text-center
+{
+	text-align: center;
+}
+
+.text-dark
+{
+	color: var(--text-dark);
+}
+
+.spinner
+{
+	animation: spin 1.5s linear infinite;
+}
+
+.hidden
+{
+	display: none;
+}
+
+.modal
+{
+	position: absolute;
+	width: 100vw;
+	height: 100vh;
+	background: rgba(0, 0, 0, 0.2);
+	padding: 15vh 15vw;
+}
+
+.modal-nav
+{
+	/* position: absolute; */
+	position: relative;
+	top: 30px;
+	right: 10px;
+	text-align: right;
+}
+
+.close-btn
+{
+	padding: 0;
+}
+
+.modal-content
+{
+	width: 100%;
+	height: 100%;
+	background: var(--modal-bg);
+	border-radius: 5px;
+	border: solid 1px rgb(24, 24, 24);
+	padding: 15px;
+}
+
+.online
+{
+	color: var(--text-success);
+}
+
+.away
+{
+	color: var(--warning);
+}
+
+.busy
+{
+	color: var(--text-danger);
+}
+
+.offline
+{
+	color: var(--offline);
+}
+
+.avatar
+{
+	background: var(--skeleton);
+	background-size: cover;
+	border-radius: 5px;
+	min-width: 40px;
+	height: 40px;
+}
+
+.flex-row
+{
+	display: flex;
+	flex-direction: row;
+}
+
+.flex-col
+{
+	display: flex;
+	flex-direction: column;
+}
+
+.items-center
+{
+	align-items: center;
+}
+
+.justify-center
+{
+	justify-content: center;
+}
+
+.justify-between
+{
+	justify-content: space-between;
+}
+
+.items-between
+{
+	align-items: space-between;
+}
+
+@keyframes spin
+{
+	from {transform: rotate(0deg);}
+	to {transform: rotate(360deg);}
+}

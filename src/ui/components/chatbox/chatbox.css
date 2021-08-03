@@ -1,0 +1,49 @@
+@import "../../global.css";
+
+.chatbox
+{
+	padding-top: 3px;
+	padding-left: 20px;
+	padding-right: 20px;
+	padding-bottom: 5px;
+	display: flex;
+	flex-direction: row;
+	box-shadow: 5px 0px 5px rgba(0, 0, 0, 0.5);
+}
+
+.chatbox textarea
+{
+	color: inherit;
+	border-radius: 5px;
+	padding: 5px;
+	/* width: 100%; */
+	flex: 1;
+	resize: none;
+	margin: 0;
+}
+
+.chatbox .send-btn
+{
+	/* margin-left: 10px; */
+	/* margin-left: 5px; */
+	/* margin-bottom: 5px; */
+}
+
+.chatbox .col
+{
+	display: flex;
+	flex-direction: row;
+}
+
+.chatbox button
+{
+	margin-left: 5px;
+	/* padding-left: 20px;
+	padding-right: 20px; */
+}
+
+.chatbox .emoji-btn,
+.chatbox .file-btn
+{
+	padding: 10px;
+}

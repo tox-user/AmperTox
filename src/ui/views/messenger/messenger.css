@@ -1,0 +1,105 @@
+@import "../../global.css";
+
+.messenger
+{
+	display: flex;
+	flex-direction: column;
+	height: 100%;
+}
+
+.messenger.hidden
+{
+	display: none;
+}
+
+.messenger header
+{
+	display: flex;
+	flex-direction: row;
+	padding: 10px;
+	justify-content: space-between;
+	/* border-bottom: solid 1px rgba(255, 255, 255, 0.1); */
+	box-shadow: 5px 0px 5px rgba(0, 0, 0, 0.5);
+}
+
+.contact-info
+{
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	flex: 1;
+	gap: 10px;
+}
+
+.contact-info .status
+{
+	margin-left: 10px;
+}
+
+.contact-info .name-status-row
+{
+	display: flex;
+	flex-direction: row;
+}
+
+.status-message-container
+{
+	overflow: hidden;
+	max-width: 250px;
+	white-space: nowrap;
+	text-overflow: ellipsis;
+}
+
+.contact-info .name-container
+{
+	overflow: hidden;
+	max-width: 200px;
+	white-space: nowrap;
+	text-overflow: ellipsis;
+}
+
+.status-message
+{
+	color: rgba(255, 255, 255, 0.65);
+}
+
+.messenger .actions
+{
+	display: flex;
+	align-items: center;
+}
+
+.messenger .actions .btn
+{
+	margin-right: 15px;
+}
+
+.messenger .actions .btn:last-child
+{
+	margin-right: 0;
+}
+
+.chatlog-container
+{
+	overflow: auto;
+	background: transparent;
+	height: 100%;
+}
+
+#chatlog
+{
+	flex: 1;
+}
+
+@media(max-width: 850px)
+{
+	.messenger .actions .action-name
+	{
+		display: none;
+	}
+
+	.contact-info .contact-info-info
+	{
+		max-width: 150px;
+	}
+}

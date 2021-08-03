@@ -1,0 +1,16 @@
+@import "../../global.css";
+
+.thread .header
+{
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	margin-top: 10px;
+	margin-bottom: 10px;
+}
+
+.thread .header .avatar
+{
+	min-width: 30px;
+	height: 30px;
+}

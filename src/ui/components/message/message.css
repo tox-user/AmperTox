@@ -1,0 +1,14 @@
+@import "../../global.css";
+
+.message
+{
+	display: flex;
+	flex-direction: row;
+	justify-content: space-between;
+	padding: 5px 0;
+}
+
+.date
+{
+	color: var(--text-dark);
+}

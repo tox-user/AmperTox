@@ -1,0 +1,78 @@
+@import "../../global.css";
+
+.contact-status
+{
+	margin-left: 10px;
+	display: block;
+}
+
+.status-message
+{
+	display: block;
+	color: rgba(255, 255, 255, 0.65);
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
+.contact
+{
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	padding: 10px;
+	cursor: pointer;
+	overflow: hidden;
+	transition: background-color 0.1s ease-in;
+}
+
+.contact .text
+{
+	margin-left: 10px;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.contact .name
+{
+	flex: 1;
+	display: block;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
+.contact:hover
+{
+	/* background: rgba(255, 255, 255, 0.075); */
+	background: rgba(255, 255, 255, 0.05);
+}
+
+.contact.active
+{
+	background: var(--background);
+	cursor: default;
+}
+
+.contact.notification
+{
+	background: var(--primary);
+	color: "white";
+}
+
+.contact.notification:hover
+{
+	background: var(--primary-light);
+}
+
+.contact .notification-icon
+{
+	margin-left: 10px;
+}
+
+.contact-info-container
+{
+	display: flex;
+	flex-direction: row;
+	justify-content: space-between;
+	flex: 1;
+}
