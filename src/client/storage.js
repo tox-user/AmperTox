@@ -3,6 +3,11 @@ let db;
 
 module.exports =
 {
+	/**
+	 * Opens the database asynchronously
+	 * @param {string} databasePath path to database file
+	 * @returns {Promise}
+	 */
 	open: async (databasePath) =>
 	{
 		return new Promise((resolve, reject) =>
@@ -21,6 +26,10 @@ module.exports =
 		});
 	},
 
+	/**
+	 * Closes the database asynchronously
+	 * @returns {Promise}
+	 */
 	close: async () =>
 	{
 		return new Promise((resolve, reject) =>
@@ -39,6 +48,10 @@ module.exports =
 		});
 	},
 
+	/**
+	 * Sets up the database for a new profile
+	 * @returns {Promise}
+	 */
 	createTables: async () =>
 	{
 		return new Promise((resolve, reject) =>
@@ -65,6 +78,14 @@ module.exports =
 		});
 	},
 
+	/**
+	 * Saves a message to the database
+	 * @param {string} contactPk contact's public key
+	 * @param {string} message
+	 * @param {string} ownerPk sender's public key
+	 * @param {number} timestamp date of when the message was sent
+	 * @returns {Promise} promise that returns message id
+	 */
 	addMessage: async (contactPk, message, ownerPk, timestamp) =>
 	{
 		return new Promise((resolve, reject) =>
@@ -84,6 +105,12 @@ module.exports =
 		});
 	},
 
+	/**
+	 * Asynchronously loads messages for a specified contact
+	 * @param {string} contactPk contact's public key
+	 * @param {number} amount amount of messages to load
+	 * @returns {Promise} promise that returns loaded messages
+	 */
 	getMessages: async (contactPk, amount=20) =>
 	{
 		return new Promise((resolve, reject) =>

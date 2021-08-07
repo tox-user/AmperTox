@@ -5,6 +5,11 @@ const Status = {
 	OFFLINE: 3
 };
 
+/**
+ * Returns a display name for specified status
+ * @param {number} status
+ * @returns {string} status display name
+ */
 function statusToString(status)
 {
 	switch(status)

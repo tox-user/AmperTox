@@ -8,6 +8,11 @@ const FileKind = require("../models/file-kind");
 
 class Tox
 {
+	/**
+	 * Creates new Tox instance
+	 * @typedef {import('../models/tox-options')} ToxOptions
+	 * @param {ToxOptions} options
+	 */
 	constructor(options=null)
 	{
 		this.error = ref.alloc("int");
@@ -28,16 +33,30 @@ class Tox
 		this.contacts = this.getContacts();
 	}
 
+	/**
+	 * Calls Tox loop
+	 */
 	iterate()
 	{
 		libtoxcore.tox_iterate(this.tox, null);
 	}
 
+	/**
+	 * Gets time until next Tox loop should be called
+	 * @returns {number} miliseconds
+	 */
 	getIterationInterval()
 	{
 		return libtoxcore.tox_iteration_interval(this.tox);
 	}
 
+	/**
+	 * Connects to a bootstrap node
+	 * @param {string} ipAddress bootstrap node's ip address
+	 * @param {number} port bootstrap node's port
+	 * @param {string} publicKey bootstrap node's public key
+	 * @returns {boolean}
+	 */
 	connect(ipAddress, port, publicKey)
 	{
 		const buffer = Buffer.from(publicKey, "hex");
@@ -45,6 +64,10 @@ class Tox
 		return libtoxcore.tox_bootstrap(this.tox, ipAddress, port, view, this.bootstrapError);
 	}
 
+	/**
+	 * Gets this Tox instance's Tox ID
+	 * @returns {string} Tox ID
+	 */
 	getAddress()
 	{
 		const size = libtoxcore.tox_address_size();
@@ -54,6 +77,10 @@ class Tox
 		return Buffer.from(view).toString("hex");
 	}
 
+	/**
+	 * Gets this Tox instance's public key
+	 * @returns {string} public key
+	 */
 	getPublicKey()
 	{
 		const size = libtoxcore.tox_public_key_size();
@@ -63,6 +90,10 @@ class Tox
 		return Buffer.from(view).toString("hex");
 	}
 
+	/**
+	 * Gets this Tox instance's username
+	 * @returns {string} username
+	 */
 	getUsername()
 	{
 		const size = libtoxcore.tox_self_get_name_size(this.tox);
@@ -72,6 +103,10 @@ class Tox
 		return Buffer.from(view).toString("utf8");
 	}
 
+	/**
+	 * Sets new username for this Tox instance
+	 * @param {string} name
+	 */
 	setUsername(name)
 	{
 		const errorPtr = ref.alloc("int");
@@ -80,6 +115,10 @@ class Tox
 		this.username = this.getUsername();
 	}
 
+	/**
+	 * Sets new status message for this Tox instance
+	 * @param {string} statusMessage
+	 */
 	setStatusMessage(statusMessage)
 	{
 		const errorPtr = ref.alloc("int");
@@ -88,6 +127,10 @@ class Tox
 		this.username = this.getUsername();
 	}
 
+	/**
+	 * Gets this Tox instance's status message
+	 * @returns {string} status message
+	 */
 	getStatusMessage()
 	{
 		const size = libtoxcore.tox_self_get_status_message_size(this.tox);
@@ -97,6 +140,11 @@ class Tox
 		return Buffer.from(view).toString("utf8");
 	}
 
+	/**
+	 * Asynchronously saves this Tox profile
+	 * @param {string} profileSavePath path to save the profile in - it must contain a file name without the file extension
+	 * @returns {Promise}
+	 */
 	save(profileSavePath)
 	{
 		return new Promise((resolve) =>
@@ -118,6 +166,11 @@ class Tox
 		});
 	}
 
+	/**
+	 * Asynchronously loads a Tox profile
+	 * @param {string} profileName path with a file name but witout the file extension
+	 * @returns {Promise<Uint8Array>}
+	 */
 	static load(profileName)
 	{
 		return new Promise((resolve) =>
@@ -136,6 +189,10 @@ class Tox
 		});
 	}
 
+	/**
+	 * This Tox instance has connected / disconnected
+	 * @param {(tox: any, status: number, userData: any) => void} callback
+	 */
 	onConnectionStatusChange(callback)
 	{
 		const cb = ffi.Callback('void', [types.toxPtr, 'int', types.userDataPtr], callback);
@@ -146,6 +203,10 @@ class Tox
 		});
 	}
 
+	/**
+	 * This Tox instance has received a friend request
+	 * @param {(tox: any, publicKey: string, message: string, length: number, userData: any) => void} callback
+	 */
 	onFriendRequest(callback)
 	{
 		const cb = ffi.Callback('void', [types.toxPtr, "pointer", "string", "size_t", types.userDataPtr],
@@ -162,6 +223,10 @@ class Tox
 		});
 	}
 
+	/**
+	 * Contact has connected / disconnected
+	 * @param {(tox: any, contactId: number, status: number, userData: any) => void} callback
+	 */
 	onFriendStatusChange(callback)
 	{
 		const cb = ffi.Callback('void', [types.toxPtr, 'int', "int", types.userDataPtr], callback);
@@ -172,6 +237,10 @@ class Tox
 		});
 	}
 
+	/**
+	 * Contact has changed their status message
+	 * @param {(tox: any, id: number, message: string, length: number, userData: any) => void} callback
+	 */
 	onFriendStatusMessageChange(callback)
 	{
 		const cb = ffi.Callback('void', [types.toxPtr, 'int', "string", "size_t", types.userDataPtr], callback);
@@ -182,6 +251,10 @@ class Tox
 		});
 	}
 
+	/**
+	 * Contact has changed their username
+	 * @param {(tox: any, id: number, name: string, length: number, userData: any) => void} callback
+	 */
 	onFriendNameChange(callback)
 	{
 		const cb = ffi.Callback('void', [types.toxPtr, 'int', "string", "size_t", types.userDataPtr], callback);
@@ -192,6 +265,10 @@ class Tox
 		});
 	}
 
+	/**
+	 * Contact has connected / disconnected
+	 * @param {(tox: any, id: number, connectionStatus: number, userData: any) => void} callback
+	 */
 	onFriendConnectionStatusChange(callback)
 	{
 		const cb = ffi.Callback('void', [types.toxPtr, 'int', "int", types.userDataPtr], callback);
@@ -202,6 +279,10 @@ class Tox
 		});
 	}
 
+	/**
+	 * Received a file transfer request
+	 * @param {(contactId: number, fileId: number, size: number, name: string, isAvatar: boolean) => void} callback
+	 */
 	onFileReceive(callback)
 	{
 		const cb = ffi.Callback('void', [types.toxPtr, "int", "int", "int", "int", "string", "size_t", types.userDataPtr],
@@ -221,6 +302,10 @@ class Tox
 		});
 	}
 
+	/**
+	 * Received a file chunk from file transfer
+	 * @param {(tox: any, contactId: number, fileId: number, position: number, data: Buffer, length: number, userData: any) => void} callback
+	 */
 	onFileReceiveChunk(callback)
 	{
 		const cb = ffi.Callback('void', [types.toxPtr, "int", "int", "int", "pointer", "size_t", types.userDataPtr],
@@ -241,6 +326,9 @@ class Tox
 		});
 	}
 
+	/**
+	 * @param {(tox: any, contactId: number, fileId: number, messageType: number, userData: any) => void} callback
+	 */
 	onFileReceiveControlMsg(callback)
 	{
 		const cb = ffi.Callback('void', [types.toxPtr, "int", "int", "int", types.userDataPtr], callback);
@@ -251,6 +339,9 @@ class Tox
 		});
 	}
 
+	/**
+	 * @param {(tox: any, contactId: number, fileId: number, position: number, size: number, userData: any) => void} callback
+	 */
 	onFileReceiveChunkRequest(callback)
 	{
 		const cb = ffi.Callback('void', [types.toxPtr, "int", "int", "int", "size_t", types.userDataPtr], callback);
@@ -261,6 +352,10 @@ class Tox
 		});
 	}
 
+	/**
+	 * Received a message from a contact
+	 * @param {(tox: any, contactId: number, messageType: number, message: string, length: number, userData: any) => void} callback
+	 */
 	onMessageReceive(callback)
 	{
 		const cb = ffi.Callback('void', [types.toxPtr, "int", "int", "string", "size_t", types.userDataPtr], callback);
@@ -271,6 +366,13 @@ class Tox
 		});
 	}
 
+	/**
+	 * Sends a file transfer control message to contact - used to accept / pause / reject file transfers
+	 * @param {number} contactId
+	 * @param {number} fileId
+	 * @param {number} type
+	 * @returns {boolean}
+	 */
 	sendFileControlMsg(contactId, fileId, type)
 	{
 		console.log("sending control", contactId, fileId, type);
@@ -278,18 +380,32 @@ class Tox
 		return libtoxcore.tox_file_control(this.tox, contactId, fileId, type, error);
 	}
 
+	/**
+	 * Accept file transfer from contact
+	 * @param {number} contactId
+	 * @param {number} fileId
+	 */
 	acceptFileTransfer(contactId, fileId)
 	{
 		let type = FileControl.TOX_FILE_CONTROL_RESUME.value;
 		this.sendFileControlMsg(contactId, fileId, type);
 	}
 
+	/**
+	 * Reject file transfer from contact
+	 * @param {number} contactId
+	 * @param {number} fileId
+	 */
 	rejectFileTransfer(contactId, fileId)
 	{
 		let type = FileControl.TOX_FILE_CONTROL_CANCEL.value;
 		this.sendFileControlMsg(contactId, fileId, type);
 	}
 
+	/**
+	 * Gets contacts of this Tox instance
+	 * @returns {Uint32Array} contacts
+	 */
 	getContacts()
 	{
 		const size = libtoxcore.tox_self_get_friend_list_size(this.tox);
@@ -299,6 +415,11 @@ class Tox
 		return view;
 	}
 
+	/**
+	 * Accept a friend request
+	 * @param {string} publicKey
+	 * @returns {number}
+	 */
 	acceptFriendRequest(publicKey)
 	{
 		const buffer = Buffer.from(publicKey, "hex");
@@ -307,6 +428,11 @@ class Tox
 		return libtoxcore.tox_friend_add_norequest(this.tox, view, err);
 	}
 
+	/**
+	 * Gets contact's username
+	 * @param {number} id contact id
+	 * @returns {string} username
+	 */
 	getContactName(id)
 	{
 		let sizeErr = ref.alloc("int");
@@ -318,6 +444,11 @@ class Tox
 		return Buffer.from(view).toString("utf8");
 	}
 
+	/**
+	 * Gets contact's status message
+	 * @param {number} id contact id
+	 * @returns {string} status message
+	 */
 	getContactStatusMessage(id)
 	{
 		let sizeErr = ref.alloc("int");
@@ -329,6 +460,11 @@ class Tox
 		return Buffer.from(view).toString("utf8");
 	}
 
+	/**
+	 * Gets contact's public key
+	 * @param {number} id contact id
+	 * @returns {string} contact's public key
+	 */
 	getContactPublicKey(id)
 	{
 		let err = ref.alloc("int");
@@ -338,6 +474,11 @@ class Tox
 		return Buffer.from(view).toString("hex");
 	}
 
+	/**
+	 * Send a message to contact
+	 * @param {number} contactId
+	 * @param {string} message
+	 */
 	sendMessage(contactId, message)
 	{
 		const messageType = 0; // normal message

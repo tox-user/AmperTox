@@ -5,12 +5,19 @@ import { Status, statusToString } from "../../status";
 
 class UserStatus extends Component
 {
+	/**
+	 * UserStatus component
+	 */
 	constructor()
 	{
 		super(htmlTemplate, stylesheet);
 		this.element = this.shadowRoot.querySelector(".status");
 	}
 
+	/**
+	 * @typedef {import('../../../models/contact')} Contact
+	 * @param {Contact} contact
+	 */
 	update(contact)
 	{
 		let status = contact.status;

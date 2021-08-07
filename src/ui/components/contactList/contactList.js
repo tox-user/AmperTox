@@ -1,10 +1,14 @@
 import Component from "../component.js";
 import htmlTemplate from "./contactList.html";
 import stylesheet from "!!css-loader!./contactList.css";
-import Contact from "../contact/contact";
+import ContactComponent from "../contact/contact.component";
 
 class ContactList extends Component
 {
+	/**
+	 * @typedef {import('../../../models/contact')} Contact
+	 * @param {Contact[]} contactList
+	 */
 	constructor(contactList = [])
 	{
 		super(htmlTemplate, stylesheet);
@@ -14,12 +18,19 @@ class ContactList extends Component
 		this.drawContacts();
 	}
 
+	/**
+	 * @param {Contact[]} contactList
+	 * @param {number} activeContact
+	 */
 	update(contactList, activeContact)
 	{
 		this.contactList = contactList.sort(this.sortFunction);
 		this.drawContacts(activeContact);
 	}
 
+	/**
+	 * @param {number} activeContact
+	 */
 	drawContacts(activeContact=null)
 	{
 		// clear the list
@@ -40,7 +51,7 @@ class ContactList extends Component
 
 		this.contactList.forEach(contact =>
 		{
-			const component = new Contact(contact);
+			const component = new ContactComponent(contact);
 			component.addEventListener("contactselect", (e) => this.contactSelected(this, e));
 
 			if (activeContact != null && contact.id == activeContact)
@@ -50,6 +61,10 @@ class ContactList extends Component
 		});
 	}
 
+	/**
+	 * @param {ContactList} self
+	 * @param {*} e
+	 */
 	contactSelected(self, e)
 	{
 		const event = new CustomEvent("contactselect", {detail: e.detail});
@@ -65,6 +80,9 @@ class ContactList extends Component
 		e.target.setNotification(false);
 	}
 
+	/**
+	 * @param {number} contactId
+	 */
 	contactAddNotification(contactId)
 	{
 		let children = this.listElement.children;
@@ -78,34 +96,11 @@ class ContactList extends Component
 		}
 	}
 
-	createDesktopNotification(contactId, messageContent)
-	{
-		let children = this.listElement.children;
-		for (let i = 0; i < children.length; i++)
-		{
-			if (children[i].contact.id == contactId)
-			{
-				const contactName = children[i].contact.name;
-				// new Notification(`Message from ${contactName}`, {body: messageContent}).onclick(() => children[i].click());
-				new Notification(`Message from ${contactName}`, {body: messageContent});
-				break;
-			}
-		}
-	}
-
-	/*updateContact(contact)
-	{
-		let children = this.listElement.children;
-		if (!children)
-			return;
-
-		for (let i = 0; i < children.length; i++)
-		{
-			if (children[i].contact.id == contact.id)
-				children[i].update(contact);
-		}
-	}*/
-
+	/**
+	 * @param {Contact} a
+	 * @param {Contact} b
+	 * @returns {number}
+	 */
 	sortFunction(a, b)
 	{
 		if (a.connectionStatus != 0 && b.connectionStatus == 0)
@@ -113,12 +108,6 @@ class ContactList extends Component
 
 		if (b.connectionStatus != 0 && a.connectionStatus == 0)
 			return 1;
-
-		// if (a.status < b.status)
-		// 	return 1;
-
-		// if (b.status < a.status)
-		// 	return -1;
 
 		if (a.name > b.name)
 			return 1;

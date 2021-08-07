@@ -1,10 +1,16 @@
 import Component from "../component.js";
-import htmlTemplate from "./contact.html";
-import stylesheet from "!!css-loader!./contact.css";
+import htmlTemplate from "./contact.component.html";
+import stylesheet from "!!css-loader!./contact.component.css";
 import UserStatus from "../userStatus/userStatus";
 
-class Contact extends Component
+class ContactComponent extends Component
 {
+	/**
+	 * Contact component
+	 * @typedef {import('../../../models/contact')} Contact
+	 * @param {Contact} contact
+	 * @param {number} numUnreadMessages
+	 */
 	constructor(contact, numUnreadMessages=0)
 	{
 		super(htmlTemplate, stylesheet);
@@ -32,6 +38,9 @@ class Contact extends Component
 		this.draw();
 	}
 
+	/**
+	 * @param {Contact} contact
+	 */
 	update(contact)
 	{
 		this.contact = contact;
@@ -54,6 +63,9 @@ class Contact extends Component
 		this.avatarElement.style.backgroundImage = `url(${avatarsPath}/${this.contact.publicKey.toUpperCase()}.png)`;
 	}
 
+	/**
+	 * @param {boolean} isActive
+	 */
 	setActive(isActive)
 	{
 		let contact = this.shadowRoot.querySelector(".contact");
@@ -70,6 +82,9 @@ class Contact extends Component
 		}
 	}
 
+	/**
+	 * @param {boolean} hasUnreadMessages
+	 */
 	setNotification(hasUnreadMessages)
 	{
 		this.numUnreadMessages++;
@@ -103,4 +118,4 @@ class Contact extends Component
 	}
 }
 
-export default Contact;
+export default ContactComponent;

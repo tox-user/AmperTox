@@ -1,4 +1,4 @@
-import Contact from "./components/contact/contact";
+import Contact from "./components/contact/contact.component";
 import ContactList from "./components/contactList/contactList";
 import Chatbox from "./components/chatbox/chatbox";
 import Chatlog from "./components/chatlog/chatlog";
@@ -20,7 +20,9 @@ const components = [
 	{selector: "ui-welcome", component: Welcome}
 ];
 
-// create custom components
+/**
+ * Initializes custom components
+ */
 const initComponents = () =>
 {
 	components.forEach(component =>

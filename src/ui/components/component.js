@@ -1,5 +1,10 @@
 class Component extends HTMLElement
 {
+	/**
+	 * Creates a new component
+	 * @param {string} htmlTemplate
+	 * @param {string} stylesheet
+	 */
 	constructor(htmlTemplate, stylesheet="")
 	{
 		super();

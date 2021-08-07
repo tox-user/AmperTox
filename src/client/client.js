@@ -21,6 +21,10 @@ const MAX_AVATAR_SIZE = 20 * 1024 * 1024;
 
 class Client
 {
+	/**
+	 * @param {string} profileName
+	 * @param {BrowserWindow} window
+	 */
 	constructor(profileName="", window)
 	{
 		this.profileName = profileName;
@@ -32,6 +36,11 @@ class Client
 		this.fileTransfers = [];
 	}
 
+	/**
+	 * Returns a promise that completes after specified amount of miliseconds
+	 * @param {number} ms amount of miliseconds to wait
+	 * @returns {Promise}
+	 */
 	static sleep(ms)
 	{
 		return new Promise((resolve) =>
@@ -40,7 +49,9 @@ class Client
 		});
 	}
 
-	// calls tox.iterate() as required by toxcore
+	/**
+	 * Tox loop
+	 */
 	async loop()
 	{
 		try
@@ -55,13 +66,19 @@ class Client
 		}
 	}
 
-	// client finished setting up
+	/**
+	 * Called when client is finished creating a Tox instance
+	 * @param {() => void} callback
+	 */
 	onReady(callback)
 	{
 		this.createTox().then(callback);
 	}
 
-	// create Tox instance
+	/**
+	 * Loads user's Tox profile and creates Tox instance
+	 * @returns {Promise}
+	 */
 	createTox()
 	{
 		return new Promise((resolve) =>
@@ -106,7 +123,9 @@ class Client
 		});
 	}
 
-	// start the client
+	/**
+	 * Starts the client
+	 */
 	start()
 	{
 		let errorValue = this.tox.error.deref();
@@ -162,6 +181,10 @@ class Client
 		this.loop();
 	}
 
+	/**
+	 * Closes the app
+	 * @param {Client} self
+	 */
 	async exit(self)
 	{
 		console.log("\nExiting...");
@@ -324,6 +347,11 @@ class Client
 		}
 	}
 
+	/**
+	 * Gets contact data by contactId
+	 * @param {number} id contact id
+	 * @returns {Contact}
+	 */
 	createContact(id)
 	{
 		const name = this.tox.getContactName(id);

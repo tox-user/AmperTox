@@ -6,6 +6,10 @@ const INDENT_LEVEL = 4;
 
 module.exports =
 {
+	/**
+	 * Loads client config synchronously
+	 * @returns {any} loaded config data
+	 */
 	load()
 	{
 		// this can be sync because we load config only on client start and we need it before everything else
@@ -25,6 +29,11 @@ module.exports =
 		return cfg;
 	},
 
+	/**
+	 * Saves client config asynchronously
+	 * @param {any} data config data
+	 * @returns Promise
+	 */
 	save(data)
 	{
 		return new Promise((resolve) =>
