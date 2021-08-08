@@ -8,8 +8,9 @@ class Contact
 	 * @param {string} statusMessage
 	 * @param {number} connectionStatus
 	 * @param {string} publicKey contact's public key
+	 * @param {number} numUnreadMessages amount of unread messages from this contact
 	 */
-	constructor (id, name, status, statusMessage, connectionStatus, publicKey)
+	constructor (id, name, status, statusMessage, connectionStatus, publicKey, numUnreadMessages=0)
 	{
 		this.id = id;
 		this.name = name;
@@ -17,5 +18,6 @@ class Contact
 		this.statusMessage = statusMessage;
 		this.connectionStatus = connectionStatus;
 		this.publicKey = publicKey;
+		this.numUnreadMessages = numUnreadMessages;
 	}
 };

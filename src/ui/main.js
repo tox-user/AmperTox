@@ -189,7 +189,9 @@ function addMessage(message)
 		messenger.addMessage(message);
 	} else
 	{
-		contactList.contactAddNotification(message.contactId);
+		const index = contacts.findIndex(c => c.id == message.contactId);
+		contacts[index].numUnreadMessages++;
+		contactList.updateContact(contacts[index]);
 	}
 }
 

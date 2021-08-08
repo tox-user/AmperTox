@@ -61,6 +61,19 @@ class ContactList extends Component
 		});
 	}
 
+	updateContact(contact)
+	{
+		const elements = this.listElement.querySelectorAll("ui-contact");
+		for(let i = 0; i < elements.length; i++)
+		{
+			if (elements[i].dataset.contactId == contact.id)
+			{
+				elements[i].update(contact);
+				return;
+			}
+		}
+	}
+
 	/**
 	 * @param {ContactList} self
 	 * @param {*} e
@@ -76,24 +89,10 @@ class ContactList extends Component
 			children[i].setActive(false);
 		}
 
+		const contact = e.detail;
+		contact.numUnreadMessages = 0;
+		e.target.update(contact);
 		e.target.setActive(true);
-		e.target.setNotification(false);
-	}
-
-	/**
-	 * @param {number} contactId
-	 */
-	contactAddNotification(contactId)
-	{
-		let children = this.listElement.children;
-		for (let i = 0; i < children.length; i++)
-		{
-			if (children[i].contact.id == contactId)
-			{
-				children[i].setNotification(true);
-				break;
-			}
-		}
 	}
 
 	/**

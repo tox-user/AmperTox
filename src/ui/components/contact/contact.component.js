@@ -9,14 +9,13 @@ class ContactComponent extends Component
 	 * Contact component
 	 * @typedef {import('../../../models/contact')} Contact
 	 * @param {Contact} contact
-	 * @param {number} numUnreadMessages
 	 */
-	constructor(contact, numUnreadMessages=0)
+	constructor(contact)
 	{
 		super(htmlTemplate, stylesheet);
 
 		this.contact = contact;
-		this.numUnreadMessages = numUnreadMessages;
+		this.dataset.contactId = this.contact.id;
 
 		this.element = this.shadowRoot.querySelector(".contact");
 		this.element.addEventListener("click", () =>
@@ -61,6 +60,31 @@ class ContactComponent extends Component
 
 		const avatarsPath = localStorage.getItem("avatarsPath");
 		this.avatarElement.style.backgroundImage = `url(${avatarsPath}/${this.contact.publicKey.toUpperCase()}.png)`;
+
+		const contactElement = this.shadowRoot.querySelector(".contact");
+		const notificationElement = this.shadowRoot.querySelector(".notification-icon");
+		const counterElement = this.shadowRoot.querySelector(".counter");
+
+		if (this.contact.numUnreadMessages > 0)
+		{
+			if (!contactElement.classList.contains("notification"))
+				contactElement.classList.add("notification");
+
+			notificationElement.classList.remove("hidden");
+
+			if (this.contact.numUnreadMessages > 99)
+				counterElement.textContent = "99+";
+			else
+				counterElement.textContent = this.contact.numUnreadMessages;
+		} else
+		{
+			contactElement.classList.remove("notification");
+
+			if (!notificationElement.classList.contains("hidden"))
+				notificationElement.classList.add("hidden");
+
+			counterElement.textContent = "";
+		}
 	}
 
 	/**
@@ -69,7 +93,6 @@ class ContactComponent extends Component
 	setActive(isActive)
 	{
 		let contact = this.shadowRoot.querySelector(".contact");
-		this.numUnreadMessages = 0;
 
 		if (isActive)
 		{
@@ -79,41 +102,6 @@ class ContactComponent extends Component
 		{
 			if (contact.classList.contains("active"))
 				contact.classList.remove("active");
-		}
-	}
-
-	/**
-	 * @param {boolean} hasUnreadMessages
-	 */
-	setNotification(hasUnreadMessages)
-	{
-		this.numUnreadMessages++;
-
-		let contact = this.shadowRoot.querySelector(".contact");
-		let notification = this.shadowRoot.querySelector(".notification-icon");
-		let counter = this.shadowRoot.querySelector(".counter");
-
-		if (hasUnreadMessages)
-		{
-			if (!contact.classList.contains("notification"))
-				contact.classList.add("notification");
-
-			if (notification.classList.contains("hidden"))
-				notification.classList.remove("hidden");
-
-			if (this.numUnreadMessages > 99)
-				counter.textContent = "99+";
-			else
-				counter.textContent = this.numUnreadMessages;
-		} else
-		{
-			if (contact.classList.contains("notification"))
-				contact.classList.remove("notification");
-
-			if (!notification.classList.contains("hidden"))
-				notification.classList.add("hidden");
-
-			counter.textContent = "";
 		}
 	}
 }
