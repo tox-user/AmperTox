@@ -261,6 +261,7 @@ class Client
 	{
 		console.log("Incoming file transfer");
 
+		let saveDir = DOWNLOAD_DIR;
 		if (isAvatar)
 		{
 			// reject avatars that are too big
@@ -271,11 +272,12 @@ class Client
 			}
 
 			const contactPk = self.tox.getContactPublicKey(contactId);
-			name = `${AVATARS_SAVE_DIR}/${contactPk.toUpperCase()}.png`;
+			name = `${contactPk.toUpperCase()}.png`;
+			saveDir = AVATARS_SAVE_DIR;
 		}
 
 		const safeName = name.replace("/", "");
-		let stream = fs.createWriteStream(path.resolve(DOWNLOAD_DIR, safeName), {flags: "a"});
+		const stream = fs.createWriteStream(path.resolve(saveDir, safeName), {flags: "a"});
 		self.fileTransfers.push({id: fileId, name: safeName, isAvatar: isAvatar, stream: stream});
 		self.tox.acceptFileTransfer(contactId, fileId);
 	}
