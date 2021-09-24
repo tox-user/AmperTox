@@ -5,7 +5,9 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<title>AmperTox</title>
 </head>
-<body>
+<body class="flex flex-col">
+	<ui-topbar></ui-topbar>
+
 	<div class="container">
 		<aside class="contacts">
 			<div class="user-container">
@@ -21,23 +23,13 @@
 				<button class="btn edit-profile-btn" title="Edit Profile"><i class="fas fa-pen"></i></button>
 			</div>
 
-			<div class="notification-area">
-				<ul class="notifications" id="notifications"></ul>
-			</div>
-
-			<div class="search">
-				<i class="fas fa-search search-icon"></i>
-				<input type="text" class="search-bar" placeholder="Search"/>
-			</div>
-
 			<div class="contacts-header">
-				<h3 class="title">Contacts</h3>
-				<ul class="actions">
-					<!-- <li><button class="btn"><i class="fas fa-user-plus"></i> Add Contact</button></li>
-					<li><button class="btn"><i class="fas fa-users"></i> New Group</button></li> -->
-					<li><button class="btn" title="Add Contact"><i class="fas fa-user-plus"></i></button></li>
-					<li><button class="btn" title="New Group"><i class="fas fa-users"></i></button></li>
-				</ul>
+				<h3 class="title"><i class="fas fa-user-friends" style="margin-right: 5px;"></i> Friends</h3>
+
+				<div class="search">
+					<i class="fas fa-search search-icon"></i>
+					<input type="text" class="search-bar" placeholder="Search"/>
+				</div>
 			</div>
 
 			<ui-contact-list id="contact-list"></ui-contact-list>
@@ -46,39 +38,10 @@
 		<section class="view">
 			<ui-welcome id="welcome"></ui-welcome>
 			<ui-messenger id="messenger"></ui-messenger>
-
-			<!-- <div class="group-user-list">
-
-			</div> -->
 		</section>
-
-		<div class="modal hidden" id="notifications-modal">
-			<nav class="modal-nav">
-				<button class="btn close-btn"><i class="fas fa-times-circle"></i></button>
-			</nav>
-			<div class="modal-content">
-				<h2 class="text-center">Notifications</h2>
-				<div class="invites">
-					<h3 id="num-friend-requests"></h3>
-					<ul class="friend-requests"></ul>
-
-					<h3 id="num-group-requests"></h3>
-					<ul class="group-invites"></ul>
-				</div>
-			</div>
-		</div>
-
-		<div class="modal hidden" id="add-contact-modal">
-			<nav class="modal-nav">
-				<button class="btn close-btn"><i class="fas fa-times-circle"></i></button>
-			</nav>
-			<div class="modal-content">
-				<h2 class="text-center">Add Contact</h2>
-				<input type="text" minlength="76" maxlength="76"/>
-				<button class="btn btn-secondary"><i class="fas fa-paper-plane"></i> Send Friend Request</button>
-			</div>
-		</div>
-
 	</div>
+
+	<ui-add-contact-modal id="add-contact-modal"></ui-add-contact-modal>
+	<ui-pending-invites-modal id="pending-invites-modal"></ui-pending-invites-modal>
 </body>
 </html>

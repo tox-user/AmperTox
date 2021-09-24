@@ -24,6 +24,12 @@ class ContactComponent extends Component
 			this.dispatchEvent(event);
 		});
 
+		// DEBUG
+		this.element.addEventListener("contextmenu", () => {
+			console.log("removing contact");
+			window.ipc.send("remove-contact", {contactId: contact.id});
+		});
+
 		const statusComponent = new UserStatus();
 		statusComponent.update(this.contact);
 		statusComponent.className = "contact-status";
@@ -58,7 +64,7 @@ class ContactComponent extends Component
 		statusMsg.textContent = this.contact.statusMessage;
 		statusMsg.title = this.contact.statusMessage;
 
-		const avatarsPath = localStorage.getItem("avatarsPath");
+		const avatarsPath = sessionStorage.getItem("avatarsPath");
 		this.avatarElement.style.backgroundImage = `url(${avatarsPath}/${this.contact.publicKey.toUpperCase()}.png)`;
 
 		const contactElement = this.shadowRoot.querySelector(".contact");

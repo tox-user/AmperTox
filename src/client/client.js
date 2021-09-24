@@ -18,6 +18,7 @@ const AVATARS_SAVE_DIR = path.resolve(DATA_DIR, "avatars");
 const DOWNLOAD_DIR = app.getPath("downloads");
 const MAX_NOTIFICATION_LENGTH = 200;
 const MAX_AVATAR_SIZE = 20 * 1024 * 1024;
+const NOTIFICATION_ICON_PATH = "../../assets/icon/128.png";
 
 class Client
 {
@@ -217,21 +218,34 @@ class Client
 
 	friendRequestReceived(tox, publicKey, message, length, userData, self)
 	{
-		console.log("friend request", publicKey);
-		self.window.webContents.send("friend-request", {publicKey: publicKey, message: message, length: length});
+		console.log("Friend request from", publicKey);
+		self.window.webContents.send("friend-request", {publicKey: publicKey, message: message});
+
+		if (!self.window.isFocused())
+		{
+			const notification = new Notification({title: "New Friend Request", icon: path.resolve(__dirname, NOTIFICATION_ICON_PATH)});
+			notification.on("click", () => self.window.focus());
+			notification.show();
+		}
 	}
 
 	acceptFriendRequest(event, data, self)
 	{
-		let contactId = self.tox.acceptFriendRequest(data.publicKey);
+		const contactId = self.tox.acceptFriendRequest(data.publicKey);
 		self.window.webContents.send("add-contact", this.createContact(contactId));
+		self.window.webContents.send("remove-friend-request");
+	}
+
+	declineFriendRequest(event, data, self)
+	{
+		self.window.webContents.send("remove-friend-request");
 	}
 
 	// send message to contact
 	sendMessage(event, data, self)
 	{
 		self.tox.sendMessage(data.contactId, data.message);
-		let contactPk = self.tox.getContactPublicKey(data.contactId);
+		const contactPk = self.tox.getContactPublicKey(data.contactId);
 		storage.addMessage(contactPk, data.message, self.tox.publicKey, new Date().getTime());
 	}
 
@@ -277,7 +291,7 @@ class Client
 		}
 
 		const safeName = name.replace("/", "");
-		const stream = fs.createWriteStream(path.resolve(saveDir, safeName), {flags: "a"});
+		const stream = fs.createWriteStream(path.resolve(saveDir, safeName), {flags: "w"});
 		self.fileTransfers.push({id: fileId, name: safeName, isAvatar: isAvatar, stream: stream});
 		self.tox.acceptFileTransfer(contactId, fileId);
 	}
@@ -343,7 +357,7 @@ class Client
 			if (body.length > MAX_NOTIFICATION_LENGTH)
 				body = body.substring(0, MAX_NOTIFICATION_LENGTH - 1);
 
-			const notification = new Notification({title: title, body: body, icon: path.resolve(__dirname, "../../assets/logo.png")});
+			const notification = new Notification({title: title, body: body, icon: path.resolve(__dirname, NOTIFICATION_ICON_PATH)});
 			notification.on("click", () => self.window.focus());
 			notification.show();
 		}
@@ -396,6 +410,21 @@ class Client
 		});
 
 		self.window.webContents.send("messages-loaded", messages);
+	}
+
+	sendFriendRequest(event, toxId, message, self)
+	{
+		const contactId = self.tox.sendFriendRequest(toxId, message);
+		self.window.webContents.send("add-contact", this.createContact(contactId));
+	}
+
+	removeContact(event, contactId, self)
+	{
+		const success = self.tox.removeContact(contactId);
+		if (success)
+			self.window.webContents.send("remove-contact", {contactId});
+		else
+			console.error("Error while removing contact");
 	}
 }
 

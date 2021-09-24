@@ -1,16 +1,12 @@
 import "./index.css";
-import Modal from "./components/modal";
 import initComponents from "./components";
 const connectionSpinner = document.querySelector("#connection-spinner");
 const connectionStatusText = document.querySelector("#connection-status");
 const statusMessageText = document.querySelector("#status-message");
 const usernameText = document.querySelector("#username");
-const notifications = document.querySelector("#notifications");
 const contactList = document.querySelector("#contact-list");
 const messenger = document.querySelector("#messenger");
 const welcome = document.querySelector("#welcome");
-let notificationModal = new Modal("notifications-modal");
-let friendRequests = [];
 let contacts = [];
 let activeContact = null;
 let username = "";
@@ -27,9 +23,9 @@ function loadInitialData(data)
 	statusMessageText.textContent = data.statusMessage;
 	statusMessageText.title = data.statusMessage;
 
-	localStorage.setItem("avatarsPath", data.avatarsSaveDir);
+	sessionStorage.setItem("avatarsPath", data.avatarsSaveDir);
 	assetsPath = data.assetsPath;
-	localStorage.setItem("assetsPath", assetsPath);
+	sessionStorage.setItem("assetsPath", assetsPath);
 
 	contacts = data.contacts;
 	contactList.update(contacts, activeContact);
@@ -100,89 +96,25 @@ function clearStatus()
 		connectionStatusText.classList.remove("offline");
 }
 
-function updateModalNotificationList()
-{
-	let list = notificationModal.element.querySelector(".friend-requests");
-
-	// clear list
-	while (list.firstChild)
-	{
-		list.removeChild(list.firstChild);
-	}
-
-	let numFriendRequests = document.querySelector("#num-friend-requests");
-	numFriendRequests.textContent = "";
-
-	if (friendRequests.length > 0)
-		numFriendRequests.textContent = `${friendRequests.length} friend request(s)`;
-
-	// loadTemplate("partials/friend-request.html").then(element =>
-	// {
-	// 	friendRequests.forEach(req =>
-	// 	{
-	// 		let targetElement = element.cloneNode(true);
-	// 		targetElement.querySelector("#request-pk").textContent = req.publicKey;
-	// 		targetElement.querySelector("#request-message").textContent = req.message;
-
-	// 		targetElement.querySelector("#accept-request").addEventListener("click", () =>
-	// 		{
-	// 			window.ipc.send("accept-friend-request", req);
-	// 			let index = friendRequests.findIndex(req => req.publicKey == req.publicKey);
-	// 			friendRequests.splice(index, 1);
-	// 			updateNotifications();
-	// 		});
-
-	// 		targetElement.querySelector("#decline-request").addEventListener("click", () =>
-	// 		{
-	// 			let index = friendRequests.findIndex(req => req.publicKey == req.publicKey);
-	// 			friendRequests.splice(index, 1);
-	// 			updateNotifications();
-	// 		});
-
-	// 		list.append(targetElement);
-	// 	});
-	// });
-}
-
-// function notificationClicked(e)
-// {
-// 	notificationModal.show();
-// }
-
-function updateNotifications()
-{
-	// clear list
-	while (notifications.firstChild)
-	{
-		notifications.removeChild(notifications.firstChild);
-	}
-
-	// loadTemplate("partials/notification.html")
-	// .then(element =>
-	// {
-	// 	friendRequests.forEach(req =>
-	// 	{
-	// 		let targetElement = element.cloneNode(true);
-	// 		let text = targetElement.querySelector("#notification-text");
-	// 		text.textContent = `${friendRequests.length} new friend request(s)`;
-	// 		targetElement.querySelector("button").addEventListener("click", notificationClicked);
-	// 		notifications.appendChild(targetElement);
-	// 	});
-	// });
-
-	updateModalNotificationList();
-}
-
 function addContact(contact)
 {
 	contacts.push(contact);
 	contactList.update(contacts, activeContact);
 }
 
+function removeContact(contactId)
+{
+	const index = contacts.findIndex((contact) => contact.id == contactId);
+	contacts.splice(index, 1);
+	if (activeContact == contactId)
+		activeContact = null;
+
+	contactList.update(contacts, activeContact);
+}
+
 function addMessage(message)
 {
-	if (!document.hasFocus())
-		new Audio(`${assetsPath}/incoming-message.wav`).play();
+	playAudioNotification();
 
 	if (activeContact == message.contactId)
 	{
@@ -232,6 +164,12 @@ function sendMessage(e)
 	messenger.addMessage(message);
 }
 
+function playAudioNotification()
+{
+	if (!document.hasFocus())
+		new Audio(`${assetsPath}/incoming-message.wav`).play();
+}
+
 window.ipc.on("data", (data) => loadInitialData(data));
 
 window.ipc.on("connection-status-change", (status) =>
@@ -254,12 +192,6 @@ window.ipc.on("connection-status-change", (status) =>
 	}
 });
 
-window.ipc.on("friend-request", (data) =>
-{
-	friendRequests.push(data);
-	updateNotifications();
-});
-
 window.ipc.on("friend-status-change", (data) => updateContactStatus(data.contactId, data.status));
 window.ipc.on("friend-status-message-change", (data) => updateContactStatusMessage(data.contactId, data.message));
 window.ipc.on("friend-name-change", (data) => updateContactName(data.contactId, data.name));
@@ -268,6 +200,8 @@ window.ipc.on("friend-avatar-receive", (data) => updateContactAvatar(data.contac
 window.ipc.on("message", (message) => addMessage(message));
 window.ipc.on("messages-loaded", (data) => loadMessages(data));
 window.ipc.on("add-contact", addContact);
+window.ipc.on("remove-contact", (data) => removeContact(data.contactId));
+window.ipc.on("friend-request", playAudioNotification);
 window.ipc.send("data-request");
 initComponents();
 contactList.addEventListener("contactselect", contactSelected);

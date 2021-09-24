@@ -33,6 +33,7 @@ const libtoxcore = ffi.Library("libtoxcore.so.2",
 	"tox_friend_get_status_message_size": ["size_t", [types.toxPtr, "int", "pointer"]],
 	"tox_friend_get_public_key": ["bool", [types.toxPtr, "int", "pointer", "pointer"]],
 	"tox_friend_send_message": ["int", [types.toxPtr, "int", "int", "pointer", "size_t", "pointer"]],
+	"tox_friend_delete": ["bool", [types.toxPtr, "int", "pointer"]],
 	"tox_file_control": ["bool", [types.toxPtr, "int", "int", "int", "pointer"]],
 
 	// callbacks

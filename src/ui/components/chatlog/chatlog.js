@@ -73,7 +73,7 @@ class Chatlog extends Component
 	{
 		this.shadowRoot.querySelectorAll(".avatar").forEach((avatar) =>
 		{
-			const avatarsPath = localStorage.getItem("avatarsPath");
+			const avatarsPath = sessionStorage.getItem("avatarsPath");
 			avatar.style.backgroundImage = `url(${avatarsPath}/${contact.publicKey.toUpperCase()}.png)`;
 		});
 	}

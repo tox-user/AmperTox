@@ -1,0 +1,19 @@
+@import "../../global.css";
+
+.topbar
+{
+	background-color: rgba(0, 0, 0, 0.2);
+}
+
+.topbar .notifications
+{
+	display: flex;
+	flex-direction: row;
+	gap: 10px;
+}
+
+.topbar .notifications .request-notification-btn
+{
+	padding: 0px 10px;
+	margin-right: 10px;
+}

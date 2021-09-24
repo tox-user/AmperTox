@@ -43,7 +43,7 @@ class Messenger extends Component
 		status.update(contact);
 		this.element.querySelector(".status-message").textContent = contact.statusMessage;
 
-		const avatarsPath = localStorage.getItem("avatarsPath");
+		const avatarsPath = sessionStorage.getItem("avatarsPath");
 		this.element.querySelector(".avatar").style.backgroundImage = `url(${avatarsPath}/${contact.publicKey.toUpperCase()}.png)`;
 
 		if (msgs)

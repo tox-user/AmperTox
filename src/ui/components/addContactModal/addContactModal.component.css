@@ -1,0 +1,28 @@
+.add-contact-modal
+{
+	display: flex;
+	flex-direction: column;
+	gap: 20px;
+	height: 100%;
+	padding: 20px;
+	padding-bottom: 50px;
+}
+
+.tox-id-input
+{
+	padding: 10px;
+	border-radius: 5px;
+}
+
+.message-input
+{
+	border-radius: 5px;
+	padding: 10px;
+	height: 100%;
+	resize: none;
+}
+
+.send-friend-request-btn
+{
+	align-self: center;
+}

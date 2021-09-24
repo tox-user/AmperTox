@@ -418,7 +418,7 @@ class Tox
 	/**
 	 * Accept a friend request
 	 * @param {string} publicKey
-	 * @returns {number}
+	 * @returns {number} contactId
 	 */
 	acceptFriendRequest(publicKey)
 	{
@@ -483,8 +483,34 @@ class Tox
 	{
 		const messageType = 0; // normal message
 		const errorPtr = ref.alloc("int");
-		let buffer = Buffer.from(message, "utf8");
+		const buffer = Buffer.from(message, "utf8");
 		libtoxcore.tox_friend_send_message(this.tox, contactId, messageType, buffer, buffer.length, errorPtr);
+	}
+
+	/**
+	 * Sends a friend request
+	 * @param {string} toxId
+	 * @returns {number} contactId
+	 */
+	sendFriendRequest(toxId, message)
+	{
+		const buffer = Buffer.from(toxId, "hex");
+		const view = new Uint8Array(buffer);
+		const messageBuffer = Buffer.from(message, "utf8");
+		const err = ref.alloc("int");
+
+		return libtoxcore.tox_friend_add(this.tox, view, messageBuffer, messageBuffer.length, err);
+	}
+
+	/**
+	 * Removes contact from friend list
+	 * @param {string} contactId
+	 * @returns true on success
+	 */
+	removeContact(contactId)
+	{
+		const err = ref.alloc("int");
+		return libtoxcore.tox_friend_delete(this.tox, contactId, err);
 	}
 }
 

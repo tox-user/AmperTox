@@ -19,7 +19,7 @@ class MessageThread extends Component
 		const nameElement = this.shadowRoot.querySelector(".name");
 		nameElement.textContent = this.contact.name;
 
-		const avatarsPath = localStorage.getItem("avatarsPath");
+		const avatarsPath = sessionStorage.getItem("avatarsPath");
 		this.avatarElement.style.backgroundImage = `url(${avatarsPath}/${this.contact.publicKey.toUpperCase()}.png)`;
 	}
 

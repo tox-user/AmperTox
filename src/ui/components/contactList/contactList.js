@@ -13,7 +13,7 @@ class ContactList extends Component
 	{
 		super(htmlTemplate, stylesheet);
 		this.contactList = contactList.sort(this.sortFunction);
-		this.listElement = this.shadowRoot.querySelector("#contact-list");;
+		this.listElement = this.shadowRoot.querySelector("#contact-list");
 
 		this.drawContacts();
 	}

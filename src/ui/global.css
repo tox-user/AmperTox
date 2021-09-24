@@ -12,6 +12,8 @@
 	--secondary-dark: rgb(18, 139, 39);
 	--warning: rgb(226, 197, 101);
 	--danger: rgb(216, 30, 24);
+	--danger-light: rgb(226, 34, 28);
+	--danger-dark: rgb(192, 26, 20);
 	--text: rgba(255, 255, 255, 0.8);
 	--text-dark: rgba(255, 255, 255, 0.6);
 	--text-success: rgb(133, 221, 98);
@@ -30,6 +32,28 @@
 *
 {
 	box-sizing: border-box;
+}
+
+*::-webkit-scrollbar
+{
+	width: 15px;
+}
+
+*::-webkit-scrollbar-track
+{
+	box-shadow: inset 0 0 10px 10px rgb(30, 30, 30);
+	border: solid 3px rgb(30, 30, 30);
+}
+
+*::-webkit-scrollbar-thumb
+{
+	box-shadow: inset 0 0 10px 10px rgb(50, 50, 50);
+	border: solid 3px transparent;
+}
+
+*::-webkit-scrollbar-thumb:hover
+{
+	box-shadow: inset 0 0 10px 10px rgb(55, 55, 55);
 }
 
 html, body
@@ -56,6 +80,7 @@ button, textarea, input
 
 textarea, input
 {
+	color: inherit;
 	border: solid 1px transparent;
 	outline: none;
 	background: rgba(0, 0, 0, 0.3);
@@ -200,39 +225,6 @@ ul
 .hidden
 {
 	display: none;
-}
-
-.modal
-{
-	position: absolute;
-	width: 100vw;
-	height: 100vh;
-	background: rgba(0, 0, 0, 0.2);
-	padding: 15vh 15vw;
-}
-
-.modal-nav
-{
-	/* position: absolute; */
-	position: relative;
-	top: 30px;
-	right: 10px;
-	text-align: right;
-}
-
-.close-btn
-{
-	padding: 0;
-}
-
-.modal-content
-{
-	width: 100%;
-	height: 100%;
-	background: var(--modal-bg);
-	border-radius: 5px;
-	border: solid 1px rgb(24, 24, 24);
-	padding: 15px;
 }
 
 .online

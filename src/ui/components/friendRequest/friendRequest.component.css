@@ -1,0 +1,28 @@
+@import "../../global.css";
+
+.friend-request
+{
+	margin-bottom: 30px;
+}
+
+.friend-request > div
+{
+	margin-top: 10px;
+}
+
+.friend-request button
+{
+	padding: 5px 10px;
+	margin-right: 10px;
+}
+
+.friend-request p
+{
+	margin-top: 0;
+	margin-bottom: 0;
+}
+
+.request-pk
+{
+	color: var(--text-dark);
+}

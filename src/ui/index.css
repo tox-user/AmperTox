@@ -1,27 +1,11 @@
 @import "global.css";
 
-.contacts-header
-{
-	display: flex;
-	flex-direction: row;
-	align-items: center;
-	justify-content: space-between;
-}
-
-.contacts-header .actions
-{
-	display: flex;
-	flex-direction: row;
-	justify-content: space-between;
-	padding-left: 5px;
-	padding-right: 5px;
-}
-
 .container
 {
 	display: flex;
 	flex-direction: row;
 	height: 100%;
+	overflow: hidden;
 }
 
 .contacts
@@ -32,34 +16,17 @@
 	padding-top: 10px;
 }
 
+.contacts-header
+{
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	gap: 10px;
+}
+
 .contacts .title
 {
 	padding-left: 10px;
-}
-
-.notification-area
-{
-	margin-bottom: 10px;
-}
-
-.notifications li
-{
-	/* display: */
-	text-align: center;
-	margin-bottom: 5px;
-	padding: 0 20px;
-}
-
-.notifications li i
-{
-	margin-right: 5px;
-}
-
-.notifications li button
-{
-	width: 100%;
-	padding-top: 5px;
-	padding-bottom: 5px;
 }
 
 .search
@@ -69,32 +36,26 @@
 	flex-direction: row;
 	justify-content: center;
 	align-items: center;
-	padding: 0 20px;
+	padding: 0 5px;
+	width: 120px;
 }
 
 .search .search-icon
 {
 	color: rgba(255, 255, 255, 0.4);
 	position: absolute;
-	left: 30px;
-	top: 8px;
+	left: 15px;
+	top: 6px;
 }
 
 .search-bar
 {
 	border-radius: 5px;
-	font-size: 18px;
-	color: inherit;
+	font-size: 16px;
 	padding: 5px;
 	padding-left: 35px;
 	width: 100%;
 }
-
-/* .search-bar:focus
-{
-	border: solid 1px red;
-	outline: solid 1px red;
-} */
 
 .title
 {
@@ -112,6 +73,11 @@
 	margin-bottom: 20px;
 }
 
+.user-container:hover > .edit-profile-btn
+{
+	display: block;
+}
+
 .user
 {
 	display: flex;
@@ -122,8 +88,7 @@
 
 .edit-profile-btn
 {
-	color: rgba(255, 255, 255, 0.65);
-	padding: 5px;
+	display: none;
 }
 
 .user-avatar
@@ -153,56 +118,15 @@
 
 .view
 {
-	/* padding: 10px; */
 	flex: 1;
 }
 
 #connection-spinner
 {
 	color: rgba(255, 255, 255, 0.8);
-	/* color: var(--text-success); */
-	/* color: var(--primary-light); */
 	margin-left: 5px;
 	position: relative;
 	top: 1px;
-}
-
-.friend-requests li
-{
-	margin-bottom: 30px;
-}
-
-.friend-requests li > div
-{
-	margin-top: 10px;
-}
-
-.friend-requests li button
-{
-	padding: 5px 10px;
-	margin-right: 10px;
-}
-
-.friend-requests li p
-{
-	margin-top: 0;
-	margin-bottom: 0;
-}
-
-#request-pk
-{
-	color: var(--text-dark);
-	font-size: 16px;
-}
-
-.invites
-{
-	padding: 5px 20px;
-}
-
-.friend-requests
-{
-	font-size: 16px;
 }
 
 @media(max-width: 800px)
@@ -220,5 +144,41 @@
 	.contacts-header
 	{
 		flex-direction: column;
+	}
+}
+
+@media(max-width: 990px)
+{
+	.contacts-header
+	{
+		flex-direction: column;
+		align-items: flex-start;
+		gap: 0;
+	}
+
+	.search
+	{
+		width: 100%;
+	}
+
+	.contacts .title
+	{
+		margin-bottom: 5px;
+	}
+}
+
+@media(min-width: 1350px)
+{
+	.search
+	{
+		width: 200px;
+	}
+}
+
+@media(min-width: 1550px)
+{
+	.search
+	{
+		width: auto;
 	}
 }
