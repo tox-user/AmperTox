@@ -12,6 +12,8 @@ const FileControl = require("../models/file-control");
 const storage = require("./storage");
 const Message = require("../models/message");
 const path = require("path");
+const FileTransfer = require('../models/fileTransfer');
+const { findFileTransferIndex } = require('./fileTransfer');
 
 const DATA_DIR = path.resolve(app.getPath("appData"), "tox");
 const AVATARS_SAVE_DIR = path.resolve(DATA_DIR, "avatars");
@@ -158,8 +160,8 @@ class Client
 		this.tox.onFileReceive((contactId, fileId, size, name, isAvatar) =>
 			this.fileReceived(contactId, fileId, size, name, isAvatar, self)
 		);
-		this.tox.onFileReceiveChunk((tox, contactId, fileId, position, data, length, userData) =>
-			this.fileReceivedChunk(tox, contactId, fileId, position, data, length, userData, self)
+		this.tox.onFileReceiveChunk((contactId, fileId, position, data, length) =>
+			this.fileReceivedChunk(contactId, fileId, position, data, length, self)
 		);
 		this.tox.onFileReceiveControlMsg((tox, contactId, fileId, messageType, userData) =>
 			this.fileReceivedControlMsg(tox, contactId, fileId, messageType, userData, self)
@@ -249,6 +251,24 @@ class Client
 		storage.addMessage(contactPk, data.message, self.tox.publicKey, new Date().getTime());
 	}
 
+	// start file transfer with contact
+	sendFile(contactId, filePath, fileName, fileSize, isAvatar, self)
+	{
+		console.log("Sending file", fileName);
+
+		const fileId = self.tox.sendFile(contactId, isAvatar, fileName, fileSize);
+		fs.open(filePath, "r", (err, fd) =>
+		{
+			if (err)
+			{
+				console.error("Error while opening file", err.message);
+				return;
+			}
+
+			self.fileTransfers.push(new FileTransfer(fileId, fd, fileName, contactId, isAvatar));
+		});
+	}
+
 	friendStatusChanged(tox, id, status, userData, self)
 	{
 		self.window.webContents.send("friend-status-change", {contactId: id, status: status});
@@ -268,12 +288,30 @@ class Client
 	friendConnectionStatusChanged(tox, id, connectionStatus, userData, self)
 	{
 		self.window.webContents.send("friend-connection-status-change", {contactId: id, connectionStatus: connectionStatus});
+
+		// send our avatar when friend became online
+		// TODO: make sure previous status was 0 (offline)
+		if (connectionStatus > 0)
+		{
+			console.log("Sending avatar", connectionStatus, id);
+			const fileName = `${self.tox.publicKey.toUpperCase()}.png`;
+			const filePath = path.resolve(AVATARS_SAVE_DIR, fileName);
+
+			// get avatar file size
+			fs.stat(filePath, (err, stats) =>
+			{
+				if (err) // avatars are optional, so it's fine if this file doesn't exist
+					return;
+
+				self.sendFile(id, filePath, fileName, stats.size, true, self);
+			});
+		}
 	}
 
 	// file transfer was initiated by our contact
 	fileReceived(contactId, fileId, size, name, isAvatar, self)
 	{
-		console.log("Incoming file transfer");
+		console.log("Incoming file transfer", name);
 
 		let saveDir = DOWNLOAD_DIR;
 		if (isAvatar)
@@ -281,6 +319,7 @@ class Client
 			// reject avatars that are too big
 			if (size > MAX_AVATAR_SIZE)
 			{
+				console.log("Incoming avatar file is too big, rejecting");
 				self.tox.rejectFileTransfer(contactId, fileId);
 				return;
 			}
@@ -290,54 +329,106 @@ class Client
 			saveDir = AVATARS_SAVE_DIR;
 		}
 
-		const safeName = name.replace("/", "");
-		const stream = fs.createWriteStream(path.resolve(saveDir, safeName), {flags: "w"});
-		self.fileTransfers.push({id: fileId, name: safeName, isAvatar: isAvatar, stream: stream});
-		self.tox.acceptFileTransfer(contactId, fileId);
+		const safeName = name.replace("/", "").replace("\\", "");
+		const filePath = path.resolve(saveDir, safeName);
+
+		try
+		{
+			const fd = fs.openSync(filePath, "w");
+			self.fileTransfers.push(new FileTransfer(fileId, fd, safeName, contactId, isAvatar));
+			self.tox.acceptFileTransfer(contactId, fileId);
+		} catch (err)
+		{
+			console.error("Error while trying to access path", err.message);
+		}
 	}
 
 	// receive file chunk - apparently order of packets is guaranteed by toxcore
 	// on final chunk length is 0 and data is null
-	fileReceivedChunk(tox, contactId, fileId, position, data, length, userData, self)
+	fileReceivedChunk(contactId, fileId, position, data, length, self)
 	{
-		console.log("Writing chunk", position, length);
-		const index = self.fileTransfers.findIndex(transfer => transfer.id == fileId);
-		if (index > -1)
+		console.log("Received file chunk", position, length);
+
+		const index = findFileTransferIndex(self.fileTransfers, fileId, contactId);
+		if (index < 0)
+			return;
+
+		if (length > 0) // transfer isn't finished
 		{
-			if (length > 0) // transfer isn't finished
+			try
 			{
-				self.fileTransfers[index].stream.write(data);
-			} else
+				fs.writeSync(self.fileTransfers[index].fd, data, 0, length, position);
+			} catch (err)
 			{
-				console.log("File transfer complete");
-				self.fileTransfers[index].stream.end();
+				console.error("Error while writing to disk", err.message);
+			}
+		} else
+		{
+			console.log("File transfer complete");
+			fs.close(self.fileTransfers[index].fd, (err) =>
+			{
+				if (err)
+					console.error("Error while closing file", err.message);
 
 				if (self.fileTransfers[index].isAvatar)
-				{
 					self.window.webContents.send("friend-avatar-receive", {contactId: contactId});
-				}
 
 				self.fileTransfers.splice(index, 1);
-			}
+			});
 		}
 	}
 
 	fileReceivedControlMsg(tox, contactId, fileId, messageType, userData, self)
 	{
-		console.log("File control message");
-		const index = self.fileTransfers.findIndex(transfer => transfer.fileId == fileId);
-		if (index > -1 && fileId == self.fileTransfers[index].fileId && contactId == self.fileTransfers[index].contactId)
+		console.log("File control message received", messageType);
+
+		const index = findFileTransferIndex(self.fileTransfers, fileId, contactId);
+		if (index < 0)
+			return;
+
+		if (messageType == FileControl.TOX_FILE_CONTROL_CANCEL)
 		{
-			if (messageType == FileControl.TOX_FILE_CONTROL_CANCEL)
+			fs.close(self.fileTransfers[index].fd, (err) =>
 			{
+				if (err)
+					console.error("Error while closing file", err.message);
+
 				self.fileTransfers.splice(index, 1);
-			}
+			});
 		}
 	}
 
 	fileReceivedChunkRequest(tox, contactId, fileId, position, size, userData, self)
 	{
-		console.log("Chunk request", contactId, fileId);
+		console.log("Received chunk request", contactId, fileId, position, size);
+
+		const index = findFileTransferIndex(self.fileTransfers, fileId, contactId);
+		if (index < 0)
+			return;
+
+		if (size > 0)
+		{
+			try
+			{
+				const data = Buffer.alloc(size);
+				fs.readSync(self.fileTransfers[index].fd, data, 0, data.length, position);
+				self.tox.sendFileChunk(contactId, fileId, position, data);
+			} catch (err)
+			{
+				console.error("Error while reading from file", err.message);
+			}
+		} else
+		{
+			console.log("File sent successfully");
+
+			fs.close(self.fileTransfers[index].fd, (err) =>
+			{
+				if (err)
+					console.error("Error while closing file", err.message);
+
+				self.fileTransfers.splice(index, 1);
+			});
+		}
 	}
 
 	// message received from our contact
@@ -366,7 +457,7 @@ class Client
 	/**
 	 * Gets contact data by contactId
 	 * @param {number} id contact id
-	 * @returns {Contact}
+	 * @returns {Contact} contact object
 	 */
 	createContact(id)
 	{

@@ -1,6 +1,11 @@
 @import "../../global.css";
 
+.contact-list-container
+{
+	overflow-y: auto;
+}
+
 .contact-list
 {
-	/* overflow-y: scroll; */
+	overflow-y: auto;
 }

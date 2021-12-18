@@ -35,6 +35,9 @@ const libtoxcore = ffi.Library("libtoxcore.so.2",
 	"tox_friend_send_message": ["int", [types.toxPtr, "int", "int", "pointer", "size_t", "pointer"]],
 	"tox_friend_delete": ["bool", [types.toxPtr, "int", "pointer"]],
 	"tox_file_control": ["bool", [types.toxPtr, "int", "int", "int", "pointer"]],
+	"tox_file_send": ["int", [types.toxPtr, "int", "int", "int", "pointer", "string", "size_t", "pointer"]],
+	"tox_file_send_chunk": ["bool", [types.toxPtr, "int", "int", "int", "pointer", "size_t", "pointer"]],
+	"tox_hash": ["bool", ["pointer", "pointer", "size_t"]],
 
 	// callbacks
 	"tox_callback_self_connection_status": ["void", [types.toxPtr, "pointer"]],

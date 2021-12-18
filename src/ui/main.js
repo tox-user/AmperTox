@@ -154,11 +154,31 @@ function sendMessage(e)
 	const data = {contactId: activeContact, message: e.detail};
 	window.ipc.send("send-message", data);
 
-	let contact = {id: -1, name: username};
-	let message =
+	const contact = {id: -1, name: username};
+	const message =
 	{
 		contactId: contact.id,
 		message: e.detail,
+		date: new Date()
+	};
+	messenger.addMessage(message);
+}
+
+function sendFile(e)
+{
+	const file = e.detail;
+	window.ipc.send("send-file", {
+		contactId: activeContact,
+		filePath: file.path,
+		fileName: file.name,
+		fileSize: file.size
+	});
+
+	const contact = {id: -1, name: username};
+	const message =
+	{
+		contactId: contact.id,
+		message: "FILE TRANSFER",
 		date: new Date()
 	};
 	messenger.addMessage(message);
@@ -206,3 +226,4 @@ window.ipc.send("data-request");
 initComponents();
 contactList.addEventListener("contactselect", contactSelected);
 messenger.addEventListener("sendmessage", sendMessage);
+messenger.addEventListener("sendfile", sendFile);

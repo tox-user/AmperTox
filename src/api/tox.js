@@ -304,7 +304,7 @@ class Tox
 
 	/**
 	 * Received a file chunk from file transfer
-	 * @param {(tox: any, contactId: number, fileId: number, position: number, data: Buffer, length: number, userData: any) => void} callback
+	 * @param {(contactId: number, fileId: number, position: number, data: Buffer, length: number) => void} callback
 	 */
 	onFileReceiveChunk(callback)
 	{
@@ -316,7 +316,7 @@ class Tox
 			if (length > 0) // length is 0 on final chunk and then data is null
 				dataPtr = Buffer.from(ref.reinterpret(data, length));
 
-			callback(tox, contactId, fileId, position, dataPtr, length, userData);
+			callback(contactId, fileId, position, dataPtr, length);
 		});
 
 		libtoxcore.tox_callback_file_recv_chunk(this.tox, cb);
@@ -376,7 +376,7 @@ class Tox
 	sendFileControlMsg(contactId, fileId, type)
 	{
 		console.log("sending control", contactId, fileId, type);
-		let error = ref.alloc("int");
+		const error = ref.alloc("int");
 		return libtoxcore.tox_file_control(this.tox, contactId, fileId, type, error);
 	}
 
@@ -387,7 +387,7 @@ class Tox
 	 */
 	acceptFileTransfer(contactId, fileId)
 	{
-		let type = FileControl.TOX_FILE_CONTROL_RESUME.value;
+		const type = FileControl.TOX_FILE_CONTROL_RESUME.value;
 		this.sendFileControlMsg(contactId, fileId, type);
 	}
 
@@ -398,7 +398,7 @@ class Tox
 	 */
 	rejectFileTransfer(contactId, fileId)
 	{
-		let type = FileControl.TOX_FILE_CONTROL_CANCEL.value;
+		const type = FileControl.TOX_FILE_CONTROL_CANCEL.value;
 		this.sendFileControlMsg(contactId, fileId, type);
 	}
 
@@ -504,13 +504,59 @@ class Tox
 
 	/**
 	 * Removes contact from friend list
-	 * @param {string} contactId
-	 * @returns true on success
+	 * @param {number} contactId
+	 * @returns {boolean} true on success
 	 */
 	removeContact(contactId)
 	{
 		const err = ref.alloc("int");
 		return libtoxcore.tox_friend_delete(this.tox, contactId, err);
+	}
+
+	/**
+	 *
+	 * @param {number} contactId
+	 * @param {boolean} isAvatar
+	 * @param {string} fileName
+	 * @param {number} fileSize
+	 * @param {number} fileId
+	 * @returns {number} A file number used as an identifier in subsequent callbacks. This
+	 * 	number is per friend. File numbers are reused after a transfer terminates.
+	 * 	On failure, this function returns an unspecified value. Any pattern in file numbers
+	 * 	should not be relied on.
+	 */
+	sendFile(contactId, isAvatar, fileName, fileSize, fileId=null)
+	{
+		const err = ref.alloc("int");
+		let fileKind = FileKind.TOX_FILE_KIND_DATA;
+		if (isAvatar)
+			fileKind = FileKind.TOX_FILE_KIND_AVATAR;
+		const fileNameBuffer = Buffer.from(fileName, "utf8");
+
+		return libtoxcore.tox_file_send(this.tox, contactId, fileKind, fileSize, fileId, fileNameBuffer, fileNameBuffer.length, err);
+	}
+
+	/**
+	 *
+	 * @param {number} contactId
+	 * @param {number} fileId
+	 * @param {number} position
+	 * @param {Buffer} data
+	 * @returns {boolean} true on success
+	 */
+	sendFileChunk(contactId, fileId, position, data=null)
+	{
+		const err = ref.alloc("int");
+		let length = 0;
+		if (data != null)
+			length = data.length;
+		return libtoxcore.tox_file_send_chunk(this.tox, contactId, fileId, position, data, length, err);
+	}
+
+	// TODO: add tox hash function to use it on avatars
+	tox_hash(data)
+	{
+
 	}
 }
 

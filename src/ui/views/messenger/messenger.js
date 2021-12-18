@@ -16,6 +16,10 @@ class Messenger extends Component
 		{
 			this.dispatchEvent(new CustomEvent("sendmessage", {detail: e.detail}));
 		});
+		this.chatbox.addEventListener("sendfile", (e) =>
+		{
+			this.dispatchEvent(new CustomEvent("sendfile", {detail: e.detail}));
+		});
 
 		this.shadowRoot.querySelector(".chatlog-container").addEventListener("scroll", (e) =>
 		{

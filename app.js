@@ -39,6 +39,7 @@ function createWindow()
 		ipcMain.on("accept-friend-request", (event, arg) => client.acceptFriendRequest(event, arg, client));
 		ipcMain.on("decline-friend-request", (event, arg) => client.declineFriendRequest(event, arg, client));
 		ipcMain.on("send-message", (event, arg) => client.sendMessage(event, arg, client));
+		ipcMain.on("send-file", (event, arg) => client.sendFile(arg.contactId, arg.filePath, arg.fileName, arg.fileSize, false, client));
 		ipcMain.on("messages-request", (event, arg) => client.loadMessages(event, arg, undefined, client));
 		ipcMain.on("load-more-messages", (event, arg) => client.loadMessages(event, arg.contactId, arg.amount, client));
 		ipcMain.on("send-friend-request", (event, arg) => client.sendFriendRequest(event, arg.toxId, arg.message, client));

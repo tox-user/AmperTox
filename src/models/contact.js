@@ -2,6 +2,7 @@ module.exports =
 class Contact
 {
 	/**
+	 * Friend
 	 * @param {number} id contact's id
 	 * @param {string} name contact's username
 	 * @param {number} status
