@@ -1,8 +1,8 @@
 import Component from "../component";
-import htmlTemplate from "./message.html";
-import stylesheet from "!!css-loader!./message.css";
+import htmlTemplate from "./message.component.html";
+import stylesheet from "!!css-loader!./message.component.css";
 
-class Message extends Component
+class MessageComponent extends Component
 {
 	constructor(message)
 	{
@@ -17,4 +17,4 @@ class Message extends Component
 	}
 }
 
-export default Message;
+export default MessageComponent;

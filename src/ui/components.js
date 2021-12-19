@@ -2,7 +2,7 @@ import Contact from "./components/contact/contact.component";
 import ContactList from "./components/contactList/contactList";
 import Chatbox from "./components/chatbox/chatbox";
 import Chatlog from "./components/chatlog/chatlog";
-import Message from "./components/message/message";
+import MessageComponent from "./components/message/message.component";
 import Messenger from "./views/messenger/messenger";
 import UserStatus from "./components/userStatus/userStatus";
 import MessageThread from "./components/messageThread/messageThread";
@@ -18,7 +18,7 @@ const components = [
 	{selector: "ui-contact-list", component: ContactList},
 	{selector: "ui-chatbox", component: Chatbox},
 	{selector: "ui-chatlog", component: Chatlog},
-	{selector: "ui-message", component: Message},
+	{selector: "ui-message", component: MessageComponent},
 	{selector: "ui-messenger", component: Messenger},
 	{selector: "ui-user-status", component: UserStatus},
 	{selector: "ui-message-thread", component: MessageThread},

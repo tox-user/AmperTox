@@ -1,7 +1,7 @@
 import Component from "../component";
 import htmlTemplate from "./messageThread.html";
 import stylesheet from "!!css-loader!./messageThread.css";
-import Message from "../message/message";
+import MessageComponent from "../message/message.component";
 
 class MessageThread extends Component
 {
@@ -25,7 +25,7 @@ class MessageThread extends Component
 
 	addMessage(message)
 	{
-		let messageComponent = new Message(message);
+		const messageComponent = new MessageComponent(message);
 		this.messagesElement.appendChild(messageComponent);
 	}
 }
