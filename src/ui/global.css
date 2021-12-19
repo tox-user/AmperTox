@@ -4,12 +4,10 @@
 {
 	--primary: #1168c0;
 	--primary-light: #1672ce;
-	/* --primary: #1b83eb; */
-	/* --primary: #1e90ff; */
-	/* --secondary: rgb(133, 221, 98); */
-	--secondary: rgb(22, 156, 44);
-	--secondary-light: rgb(25, 168, 49);
-	--secondary-dark: rgb(18, 139, 39);
+	--primary-dark: #0e5ead;
+	--secondary: #1e7585;
+	--secondary-light: #218091;
+	--secondary-dark: #1a6674;
 	--warning: rgb(226, 197, 101);
 	--danger: rgb(216, 30, 24);
 	--danger-light: rgb(226, 34, 28);
@@ -21,12 +19,9 @@
 	--offline: rgba(255, 255, 255, 0.5);
 	--background-alt: rgb(32, 29, 26);
 	--background: rgb(26, 23, 21);
-	/* --background-alt: rgb(36, 33, 28);
-	--background: rgb(26, 24, 19); */
 	--skeleton: rgb(58, 53, 45);
 	--modal-bg: rgb(27, 27, 27);
 	--modal-border: rgb(22, 22, 22);
-	/* --background: rgb(31, 29, 24); */
 }
 
 *
@@ -113,12 +108,14 @@ ul
 	cursor: pointer;
 	outline: none;
 	background: transparent;
+	user-select: none;
 }
 
 .btn:disabled
 {
-	opacity: 0.35;
 	pointer-events: none;
+	background-color: #273849;
+	color: rgba(255, 255, 255, 0.5);
 }
 
 .btn:active
@@ -149,7 +146,7 @@ ul
 
 .btn-primary:active
 {
-	background: var(--primary-light);
+	background: var(--primary-dark);
 }
 
 .btn-secondary
@@ -286,6 +283,11 @@ ul
 .items-between
 {
 	align-items: space-between;
+}
+
+.items-end
+{
+	align-items: flex-end;
 }
 
 @keyframes spin

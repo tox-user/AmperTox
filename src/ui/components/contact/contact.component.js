@@ -25,6 +25,7 @@ class ContactComponent extends Component
 		});
 
 		// DEBUG
+		// TODO: add proper context menu with a button to remove contact
 		this.element.addEventListener("contextmenu", () => {
 			console.log("removing contact");
 			window.ipc.send("remove-contact", {contactId: contact.id});

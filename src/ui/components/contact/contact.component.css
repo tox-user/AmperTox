@@ -23,6 +23,7 @@
 	cursor: pointer;
 	overflow: hidden;
 	transition: background-color 0.1s ease-in;
+	user-select: none;
 }
 
 .contact .text
@@ -43,7 +44,6 @@
 
 .contact:hover
 {
-	/* background: rgba(255, 255, 255, 0.075); */
 	background: rgba(255, 255, 255, 0.05);
 }
 

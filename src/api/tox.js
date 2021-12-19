@@ -3,14 +3,14 @@ const ffi = require("ffi-napi");
 const types = require("./types");
 const libtoxcore = require("./libtoxcore");
 const fs = require("fs");
-const FileControl = require("../models/file-control");
-const FileKind = require("../models/file-kind");
+const FileControl = require("../models/tox/fileControl");
+const FileKind = require("../models/tox/fileKind");
 
 class Tox
 {
 	/**
 	 * Creates new Tox instance
-	 * @typedef {import('../models/tox-options')} ToxOptions
+	 * @typedef {import('../models/tox/options')} ToxOptions
 	 * @param {ToxOptions} options
 	 */
 	constructor(options=null)

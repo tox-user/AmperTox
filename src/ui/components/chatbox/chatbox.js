@@ -9,18 +9,34 @@ class Chatbox extends Component
 		super(htmlTemplate, stylesheet);
 
 		this.textarea = this.shadowRoot.querySelector("textarea");
-		const sendBtn = this.shadowRoot.querySelector(".send-btn");
+		this.sendBtn = this.shadowRoot.querySelector(".send-btn");
 		const fileBtn = this.shadowRoot.querySelector(".file-btn");
 		const fileInput = this.shadowRoot.querySelector("#file-input");
 
+		this.textarea.addEventListener("input", () => this.update(this));
 		this.textarea.addEventListener("keydown", (e) => this.keyDown(this, e));
-		sendBtn.addEventListener("click", () => this.sendMessage(this));
+
+		this.sendBtn.disabled = true;
+		this.sendBtn.addEventListener("click", () => this.sendMessage(this));
+
 		fileInput.addEventListener("change", (e) => this.sendFile(e, this));
 
 		fileBtn.addEventListener("click", () =>
 		{
 			fileInput.click();
 		});
+	}
+
+	update(self)
+	{
+		if (self.textarea.value == "")
+			self.sendBtn.disabled = true;
+		else
+			self.sendBtn.disabled = false;
+
+		// expand textarea each time user inserts a new line
+		const amountNewLines = self.textarea.value.split("\n").length;
+		self.textarea.rows = Math.max(1, amountNewLines);
 	}
 
 	keyDown(self, e)
@@ -36,6 +52,7 @@ class Chatbox extends Component
 	{
 		self.dispatchEvent(new CustomEvent("sendmessage", {detail: self.textarea.value}));
 		self.textarea.value = "";
+		self.update(self);
 	}
 
 	sendFile(e, self)

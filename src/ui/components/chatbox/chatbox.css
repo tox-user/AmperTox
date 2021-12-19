@@ -20,6 +20,7 @@
 	flex: 1;
 	resize: none;
 	margin: 0;
+	max-height: 50vh;
 }
 
 .chatbox .send-btn

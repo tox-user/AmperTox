@@ -1,7 +1,11 @@
 <div class="chatbox">
-	<textarea placeholder="Your message..." spellcheck="true" rows="1"></textarea>
-	<button class="btn btn-alt emoji-btn"><i class="fas fa-smile-beam"></i></button>
-	<button class="btn btn-alt file-btn"><i class="fas fa-paperclip"></i></button>
-	<button class="btn btn-primary send-btn"><i class="fas fa-paper-plane"></i> Send</button>
+	<textarea placeholder="Your message..." spellcheck="true" rows="1" maxlength="500"></textarea>
+	<div class="flex-row items-end">
+		<div class="flex-row items-center">
+			<button class="btn btn-alt emoji-btn"><i class="fas fa-smile-beam"></i></button>
+			<button class="btn btn-alt file-btn"><i class="fas fa-paperclip"></i></button>
+			<button class="btn btn-primary send-btn"><i class="fas fa-paper-plane"></i> Send</button>
+		</div>
+	</div>
 	<input type="file" id="file-input" class="hidden" />
 </div>

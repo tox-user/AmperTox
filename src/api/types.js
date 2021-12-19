@@ -1,5 +1,5 @@
 const ref = require("ref-napi");
-const ToxOptions = require("../models/tox-options");
+const ToxOptions = require("../models/tox/options");
 
 module.exports =
 {
