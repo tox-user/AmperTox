@@ -16,6 +16,7 @@ class Chatlog extends Component
 		this.isTyping = false;
 		this.lastThread = null;
 		this.lastContactId = null;
+		this.lastDate = new Date();
 		this.amountMessages = 20;
 	}
 
@@ -39,8 +40,9 @@ class Chatlog extends Component
 		let lastContactId = self.lastContactId;
 		let thread = self.lastThread;
 		let contact = {...self.contact};
+		const isSameDay = message.date.getDate() == self.lastDate.getDate();
 
-		if (message.contactId != lastContactId)
+		if (message.contactId != lastContactId || !isSameDay)
 		{
 			if (message.contactId == -1)
 			{
@@ -57,6 +59,7 @@ class Chatlog extends Component
 
 		self.lastThread = thread;
 		self.lastContactId = lastContactId;
+		self.lastDate = message.date;
 
 		self.shadowRoot.querySelector("#chatlog-end").scrollIntoView();
 	}

@@ -1,6 +1,7 @@
-const { app, BrowserWindow, ipcMain } = require("electron");
+const { app, BrowserWindow, ipcMain, shell } = require("electron");
 const Client = require("./src/client/client");
 const path = require("path");
+const URL = require("url").URL;
 require('events').EventEmitter.defaultMaxListeners = 15;
 let profileName = "";
 
@@ -53,4 +54,26 @@ function createWindow()
 }
 
 parseArgs();
+
+app.on("web-contents-created", (event, contents) =>
+{
+	// open all links in external browser
+	contents.on("will-navigate", (event, navigationUrl) =>
+	{
+		event.preventDefault();
+
+		const parsedUrl = new URL(navigationUrl);
+		if (parsedUrl.protocol == "http:" || parsedUrl.protocol == "https:")
+		{
+			shell.openExternal(navigationUrl);
+		}
+	});
+
+	// forbid creation of additional windows
+	contents.setWindowOpenHandler(() =>
+	{
+		return {action: "deny"};
+	});
+});
+
 app.whenReady().then(createWindow);

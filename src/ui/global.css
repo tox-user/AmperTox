@@ -12,6 +12,7 @@
 	--danger: rgb(216, 30, 24);
 	--danger-light: rgb(226, 34, 28);
 	--danger-dark: rgb(192, 26, 20);
+	--link: #51cee4;
 	--text: rgba(255, 255, 255, 0.8);
 	--text-dark: rgba(255, 255, 255, 0.6);
 	--text-success: rgb(133, 221, 98);
@@ -65,6 +66,17 @@ body
 	color: var(--text);
 	font-size: 16px;
 	font-family: Arial, Helvetica, sans-serif;
+}
+
+a
+{
+	color: var(--link);
+	text-decoration: none;
+}
+
+a:hover
+{
+	text-decoration: underline;
 }
 
 button, textarea, input

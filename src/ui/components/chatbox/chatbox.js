@@ -44,7 +44,9 @@ class Chatbox extends Component
 		if (e.key == "Enter" && !e.shiftKey)
 		{
 			e.preventDefault();
-			self.sendMessage(self);
+
+			if (!self.sendBtn.disabled)
+				self.sendMessage(self);
 		}
 	}
 
