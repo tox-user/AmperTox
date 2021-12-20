@@ -50,7 +50,7 @@ class Chatlog extends Component
 				contact.publicKey = this.publicKey;
 			}
 
-			thread = new MessageThread(contact);
+			thread = new MessageThread(contact, message.date);
 			self.threadsElement.appendChild(thread);
 		}
 

@@ -5,12 +5,13 @@ import MessageComponent from "../message/message.component";
 
 class MessageThread extends Component
 {
-	constructor(contact)
+	constructor(contact, date)
 	{
 		super(htmlTemplate, stylesheet);
 		this.messagesElement = this.shadowRoot.querySelector(".messages");
 		this.avatarElement = this.shadowRoot.querySelector(".avatar");
 		this.contact = contact;
+		this.date = date;
 		this.draw();
 	}
 
@@ -18,6 +19,9 @@ class MessageThread extends Component
 	{
 		const nameElement = this.shadowRoot.querySelector(".name");
 		nameElement.textContent = this.contact.name;
+
+		const dateElement = this.shadowRoot.querySelector(".date");
+		dateElement.textContent = this.date.toLocaleTimeString([], {timeStyle: "short"});
 
 		const avatarsPath = sessionStorage.getItem("avatarsPath");
 		this.avatarElement.style.backgroundImage = `url(${avatarsPath}/${this.contact.publicKey.toUpperCase()}.png)`;

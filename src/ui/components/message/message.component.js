@@ -15,7 +15,7 @@ class MessageComponent extends Component
 		text.innerHTML = parsedMessage;
 
 		const date = this.shadowRoot.querySelector(".date");
-		date.textContent = message.date.toLocaleTimeString();
+		date.textContent = message.date.toLocaleTimeString([], {timeStyle: "short"});
 	}
 
 	sanitizeInput(string)

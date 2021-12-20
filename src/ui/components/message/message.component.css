@@ -4,6 +4,7 @@
 {
 	display: flex;
 	flex-direction: row;
+	align-items: flex-start;
 	gap: 10px;
 	justify-content: space-between;
 	padding: 5px 0;
@@ -16,30 +17,38 @@
 	width: 100%;
 }
 
+.message:hover > .date
+{
+	visibility: visible;
+}
+
 .date
 {
 	color: var(--text-dark);
+	font-size: 14px;
+	visibility: hidden;
 }
 
 code, pre, blockquote
 {
-	background-color: rgba(0, 0, 0, 0.3);
 	border-radius: 5px;
 }
 
 code, pre
 {
-	color: #fff4c3;
+	background-color: rgba(255, 255, 255, 0.03);
 }
 
 code
 {
 	padding: 2px 5px;
+	color: #fff4c3;
 }
 
 pre
 {
 	padding: 10px;
+	margin: 0;
 	tab-size: 4;
 	white-space: pre-wrap;
 }
@@ -51,5 +60,6 @@ blockquote
 	border-bottom-left-radius: 0;
 	padding: 10px;
 	padding-left: 20px;
-	margin: 0 20px;
+	margin: 0;
+	color: var(--text-dark);
 }
