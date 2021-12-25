@@ -23,6 +23,7 @@ function createWindow()
 		height: 768,
 		icon: path.resolve(__dirname, "assets/icon/128.png"),
 		autoHideMenuBar: true,
+		backgroundColor: "#1a1715",
 		webPreferences:
 		{
 			nodeIntegration: false,
