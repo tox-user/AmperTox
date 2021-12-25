@@ -32,7 +32,18 @@ function createWindow()
 		}
 	});
 
-	win.loadFile("./dist/index.html");
+	// this should disable some networking features for the renderer
+	win.webContents.session.enableNetworkEmulation({offline: true});
+
+	// set nonexistent proxy address to (hopefully) disable internet connection for the renderer process (just in case)
+	win.webContents.session.setProxy({proxyRules: "socks5://0.0.0.0"}).then(() =>
+	{
+		// load the UI
+		win.loadFile("./dist/index.html");
+	}).catch((err) =>
+	{
+		console.error("Couldn't load the UI", err.message);
+	});
 
 	const client = new Client(profileName, win);
 	client.onReady(() =>
@@ -57,7 +68,7 @@ parseArgs();
 
 app.on("web-contents-created", (event, contents) =>
 {
-	// open all links in external browser
+	// open all links in external browser instead of electron
 	contents.on("will-navigate", (event, navigationUrl) =>
 	{
 		event.preventDefault();
