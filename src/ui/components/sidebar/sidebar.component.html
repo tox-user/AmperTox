@@ -1,0 +1,25 @@
+<aside class="contacts">
+	<div class="user-container">
+		<div class="user">
+			<div class="user-avatar"></div>
+			<div class="text">
+				<span class="name" id="username"></span>
+				<span class="status offline" id="connection-status">connecting <i class="fas fa-circle-notch spinner" id="connection-spinner"></i></span>
+				<span class="status-message" id="status-message"></span>
+			</div>
+		</div>
+
+		<button class="btn edit-profile-btn" title="Edit Profile"><i class="fas fa-pen"></i></button>
+	</div>
+
+	<div class="contacts-header">
+		<h3 class="title"><i class="fas fa-user-friends" style="margin-right: 5px;"></i> Friends</h3>
+
+		<div class="search">
+			<i class="fas fa-search search-icon"></i>
+			<input type="text" class="search-bar" placeholder="Filter"/>
+		</div>
+	</div>
+
+	<ui-contact-list id="contact-list"></ui-contact-list>
+</aside>

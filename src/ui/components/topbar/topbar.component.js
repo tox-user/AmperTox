@@ -28,6 +28,12 @@ class TopbarComponent extends Component
 		self.numFriendNotifications++;
 		self.requestNotificationBtn.classList.remove("hidden");
 		self.notificationBtnTitle.textContent = self.numFriendNotifications;
+
+		if (!document.hasFocus())
+		{
+			const assetsPath = sessionStorage.getItem("assetsPath");
+			new Audio(`${assetsPath}/incoming-message.wav`).play();
+		}
 	}
 
 	removeFriendRequestNotification(self)

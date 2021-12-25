@@ -12,6 +12,7 @@ import TopbarComponent from "./components/topbar/topbar.component";
 import AddContactModalComponent from "./components/addContactModal/addContactModal.component";
 import FriendRequestComponent from "./components/friendRequest/friendRequest.component";
 import PendingInvitesModalComponent from "./components/pendingInvitesModal/pendingInvitesModal.component";
+import SidebarComponent from "./components/sidebar/sidebar.component";
 
 const components = [
 	{selector: "ui-contact", component: Contact},
@@ -27,7 +28,8 @@ const components = [
 	{selector: "ui-topbar", component: TopbarComponent},
 	{selector: "ui-add-contact-modal", component: AddContactModalComponent},
 	{selector: "ui-friend-request", component: FriendRequestComponent},
-	{selector: "ui-pending-invites-modal", component: PendingInvitesModalComponent}
+	{selector: "ui-pending-invites-modal", component: PendingInvitesModalComponent},
+	{selector: "ui-sidebar", component: SidebarComponent}
 ];
 
 /**

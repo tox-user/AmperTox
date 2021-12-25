@@ -50,17 +50,17 @@ class MessageComponent extends Component
 		newString = newString.replace(fencedCodeBlockRegex, fencedCodeBlockHtml);
 
 		// parse inline code
-		const codeInlineRegex = /`(.*?)`/;
+		const codeInlineRegex = /`(.*?)`/g;
 		const codeInlineHtml = '<code>$1</code>';
 		newString = newString.replace(codeInlineRegex, codeInlineHtml);
 
 		// parse bold text
-		const boldRegex = /\*\*(.*?)\*\*/;
+		const boldRegex = /\*\*(.*?)\*\*/g;
 		const boldHtml = '<strong>$1</strong>';
 		newString = newString.replace(boldRegex, boldHtml);
 
 		// parse italic text
-		const italicRegex = /\*(.*?)\*/;
+		const italicRegex = /\*(.*?)\*/g;
 		const italicHtml = '<em>$1</em>';
 		newString = newString.replace(italicRegex, italicHtml);
 

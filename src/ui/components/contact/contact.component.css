@@ -42,6 +42,11 @@
 	text-overflow: ellipsis;
 }
 
+.contact .notification-icon
+{
+	margin-left: 10px;
+}
+
 .contact:hover
 {
 	background: rgba(255, 255, 255, 0.05);
@@ -55,18 +60,28 @@
 
 .contact.notification
 {
-	background: var(--primary);
+	background: var(--primary-dark);
 	color: "white";
 }
 
 .contact.notification:hover
 {
-	background: var(--primary-light);
+	background: var(--primary);
 }
 
-.contact .notification-icon
+.contact.notification .name
 {
-	margin-left: 10px;
+	color: white;
+}
+
+.contact.notification .status-message
+{
+	color: rgba(255, 255, 255, 0.8);
+}
+
+.contact.notification .notification-icon .counter
+{
+	color: white;
 }
 
 .contact-info-container

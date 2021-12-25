@@ -13,9 +13,59 @@ class ContactList extends Component
 	{
 		super(htmlTemplate, stylesheet);
 		this.contactList = contactList.sort(this.sortFunction);
+		this.activeContact = null;
 		this.listElement = this.shadowRoot.querySelector("#contact-list");
 
 		this.drawContacts();
+
+		window.ipc.on("data", (data) => this.update(data.contacts, null));
+		window.ipc.on("add-contact", (contact) => this.addContact(contact));
+		window.ipc.on("remove-contact", (partialContact) => this.removeContact(partialContact.id));
+		window.ipc.on("friend-name-change", (partialContact) => this.updateContact(partialContact));
+		window.ipc.on("friend-status-change", (partialContact) => this.updateContact(partialContact));
+		window.ipc.on("friend-connection-status-change", (partialContact) => this.updateContact(partialContact));
+		window.ipc.on("friend-avatar-receive", (partialContact) => this.drawContacts(this.activeContact));
+
+		window.ipc.on("friend-status-message-change", (partialContact) =>
+		{
+			const index = this.contactList.findIndex((c) => c.id == partialContact.id);
+			this.contactList[index].statusMessage = partialContact.statusMessage;
+			this.drawContacts(this.activeContact);
+		});
+
+		window.ipc.on("message", (message) =>
+		{
+			if (this.activeContact != message.contactId)
+			{
+				const index = this.contactList.findIndex((c) => c.id == message.contactId);
+				this.contactList[index].numUnreadMessages++;
+				this.drawContacts(this.activeContact);
+			}
+		});
+	}
+
+	/**
+	 * @param {Contact} contact
+	 */
+	addContact(contact)
+	{
+		const updatedList = [...this.contactList, contact];
+		this.update(updatedList, this.activeContact);
+	}
+
+	/**
+	 * @param {number} contactId
+	 */
+	removeContact(contactId)
+	{
+		const contacts = [...this.contactList];
+		let activeContact = this.activeContact;
+		const index = this.contactList.findIndex((contact) => contact.id == contactId);
+		contacts.splice(index, 1);
+		if (activeContact == contactId)
+			activeContact = null;
+
+		this.update(contacts, activeContact);
 	}
 
 	/**
@@ -25,6 +75,7 @@ class ContactList extends Component
 	update(contactList, activeContact)
 	{
 		this.contactList = contactList.sort(this.sortFunction);
+		this.activeContact = activeContact;
 		this.drawContacts(activeContact);
 	}
 
@@ -52,7 +103,7 @@ class ContactList extends Component
 		this.contactList.forEach(contact =>
 		{
 			const component = new ContactComponent(contact);
-			component.addEventListener("contactselect", (e) => this.contactSelected(this, e));
+			component.addEventListener("contactselect", (e) => this.contactSelected(e));
 
 			if (activeContact != null && contact.id == activeContact)
 				component.setActive(true);
@@ -61,27 +112,25 @@ class ContactList extends Component
 		});
 	}
 
-	updateContact(contact)
+	/**
+	 * @param {{id: number}} partialContact
+	 */
+	updateContact(partialContact)
 	{
-		const elements = this.listElement.querySelectorAll("ui-contact");
-		for(let i = 0; i < elements.length; i++)
-		{
-			if (elements[i].dataset.contactId == contact.id)
-			{
-				elements[i].update(contact);
-				return;
-			}
-		}
+		const index = this.contactList.findIndex((c) => c.id == partialContact.id);
+		const {id, ...newContactData} = partialContact;
+		const updatedContact = {...this.contactList[index], ...newContactData};
+		this.contactList[index] = updatedContact;
+		this.update(this.contactList, this.activeContact);
 	}
 
 	/**
-	 * @param {ContactList} self
-	 * @param {*} e
+	 * @param {*} e event
 	 */
-	contactSelected(self, e)
+	contactSelected(e)
 	{
 		const event = new CustomEvent("contactselect", {detail: e.detail});
-		self.dispatchEvent(event);
+		this.dispatchEvent(event);
 
 		let children = this.listElement.children;
 		for (let i = 0; i < children.length; i++)
@@ -93,6 +142,12 @@ class ContactList extends Component
 		contact.numUnreadMessages = 0;
 		e.target.update(contact);
 		e.target.setActive(true);
+
+		if (this.activeContact != contact.id)
+		{
+			this.activeContact = contact.id;
+			window.ipc.send("messages-request", contact.id);
+		}
 	}
 
 	/**

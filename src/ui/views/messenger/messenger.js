@@ -7,6 +7,7 @@ class Messenger extends Component
 	constructor()
 	{
 		super(htmlTemplate, stylesheet);
+		this.contact = null;
 		this.isVisible = false;
 		this.element = this.shadowRoot.querySelector(".messenger");
 
@@ -32,6 +33,24 @@ class Messenger extends Component
 				window.ipc.send("load-more-messages", data);
 			}
 		});
+
+		window.ipc.on("message", (message) =>
+		{
+			if (this.contact && this.contact.id == message.contactId)
+				this.addMessage(message);
+
+			if (!document.hasFocus())
+			{
+				const assetsPath = sessionStorage.getItem("assetsPath");
+				new Audio(`${assetsPath}/incoming-message.wav`).play();
+			}
+		});
+
+		window.ipc.on("friend-status-change", (partialContact) => this.updateContactOnEvent(partialContact));
+		window.ipc.on("friend-status-message-change", (partialContact) => this.updateContactOnEvent(partialContact));
+		window.ipc.on("friend-name-change", (partialContact) => this.updateContactOnEvent(partialContact));
+		window.ipc.on("friend-connection-status-change", (partialContact) => this.updateContactOnEvent(partialContact));
+		window.ipc.on("friend-avatar-receive", (partialContact) => this.draw());
 	}
 
 	show()
@@ -40,18 +59,40 @@ class Messenger extends Component
 		this.element.classList.remove("hidden");
 	}
 
-	update(contact, msgs, username, publicKey, isFirstLoad)
+	draw()
 	{
-		this.element.querySelector(".name").textContent = contact.name;
+		this.element.querySelector(".name").textContent = this.contact.name;
 		const status = this.element.querySelector("#status");
-		status.update(contact);
-		this.element.querySelector(".status-message").textContent = contact.statusMessage;
+		status.update(this.contact);
+		this.element.querySelector(".status-message").textContent = this.contact.statusMessage;
 
 		const avatarsPath = sessionStorage.getItem("avatarsPath");
-		this.element.querySelector(".avatar").style.backgroundImage = `url(${avatarsPath}/${contact.publicKey.toUpperCase()}.png)`;
+		this.element.querySelector(".avatar").style.backgroundImage = `url(${avatarsPath}/${this.contact.publicKey.toUpperCase()}.png)`;
+	}
 
-		if (msgs)
-			this.chatlog.update(contact, msgs, username, publicKey, isFirstLoad);
+	/**
+	 * @param {{id: number}} partialContact
+	 */
+	updateContact(partialContact)
+	{
+		this.contact = {...this.contact, ...partialContact};
+		this.draw();
+	}
+
+	/**
+	 * @param {{id: number}} partialContact
+	 */
+	updateContactOnEvent(partialContact)
+	{
+		if (this.contact != null && partialContact.id == this.contact.id)
+		{
+			this.updateContact(partialContact);
+		}
+	}
+
+	updateMessages(msgs, username, publicKey, isFirstLoad)
+	{
+		this.chatlog.update(this.contact, msgs, username, publicKey, isFirstLoad);
 	}
 
 	addMessage(msg)

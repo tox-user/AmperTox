@@ -271,23 +271,23 @@ class Client
 
 	friendStatusChanged(tox, id, status, userData, self)
 	{
-		self.window.webContents.send("friend-status-change", {contactId: id, status: status});
+		self.window.webContents.send("friend-status-change", {id: id, status: status});
 	}
 
 	friendStatusMessageChanged(tox, id, message, length, userData, self)
 	{
-		self.window.webContents.send("friend-status-message-change", {contactId: id, message: message});
+		self.window.webContents.send("friend-status-message-change", {id: id, statusMessage: message});
 	}
 
 	friendNameChanged(tox, id, name, length, userData, self)
 	{
-		self.window.webContents.send("friend-name-change", {contactId: id, name: name});
+		self.window.webContents.send("friend-name-change", {id: id, name: name});
 	}
 
 	// friend has connected / disconnected
 	friendConnectionStatusChanged(tox, id, connectionStatus, userData, self)
 	{
-		self.window.webContents.send("friend-connection-status-change", {contactId: id, connectionStatus: connectionStatus});
+		self.window.webContents.send("friend-connection-status-change", {id: id, connectionStatus: connectionStatus});
 
 		// send our avatar when friend became online
 		// TODO: make sure previous status was 0 (offline)
@@ -371,7 +371,7 @@ class Client
 					console.error("Error while closing file", err.message);
 
 				if (self.fileTransfers[index].isAvatar)
-					self.window.webContents.send("friend-avatar-receive", {contactId: contactId});
+					self.window.webContents.send("friend-avatar-receive", {id: contactId});
 
 				self.fileTransfers.splice(index, 1);
 			});
@@ -513,7 +513,7 @@ class Client
 	{
 		const success = self.tox.removeContact(contactId);
 		if (success)
-			self.window.webContents.send("remove-contact", {contactId});
+			self.window.webContents.send("remove-contact", {id: contactId});
 		else
 			console.error("Error while removing contact");
 	}
