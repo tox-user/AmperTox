@@ -1,8 +1,9 @@
+/** @typedef {import('../models/fileTransfer')} FileTransfer */
+
 module.exports =
 {
 	/**
 	 * Finds a file transfer index in file transfer array
-	 * @typedef {import('../models/fileTransfer')} FileTransfer
 	 * @param {FileTransfer[]} array array of file transfers
 	 * @param {number} id file transfer ID
 	 * @param {number} contactId

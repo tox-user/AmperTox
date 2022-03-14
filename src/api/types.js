@@ -7,5 +7,6 @@ module.exports =
 	userDataPtr: ref.refType(ref.types.void),
 	intPtr: ref.refType("int"),
 	stringPtr: ref.refType("string"),
-	toxOptionsPtr: ref.refType(ToxOptions)
+	toxOptionsPtr: ref.refType(ToxOptions),
+	toxEventsPtr: ref.refType(ref.types.void)
 };

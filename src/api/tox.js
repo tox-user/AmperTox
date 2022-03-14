@@ -6,6 +6,7 @@ const fs = require("fs");
 const path = require("path");
 const FileControl = require("../models/tox/fileControl");
 const FileKind = require("../models/tox/fileKind");
+const eventDefinition = require("./eventDefinition");
 
 class Tox
 {
@@ -27,6 +28,10 @@ class Tox
 		}
 
 		this.tox = libtoxcore.tox_new(optionsRef, this.error);
+		libtoxcore.tox_events_init(this.tox);
+
+		this.eventListeners = {};
+
 		this.address = this.getAddress();
 		this.username = this.getUsername();
 		this.publicKey = this.getPublicKey();
@@ -35,11 +40,27 @@ class Tox
 	}
 
 	/**
-	 * Calls Tox loop
+	 * Calls Tox loop and checks for events, calls callbacks registered with addEventListener
 	 */
-	iterate()
+	eventsIterate()
 	{
-		libtoxcore.tox_iterate(this.tox, null);
+		const eventsPtr = libtoxcore.tox_events_iterate(this.tox, false, null);
+		const subscribedEventNames = Object.keys(eventDefinition).filter((eventName) => Object.keys(this.eventListeners).includes(eventName));
+
+		subscribedEventNames.forEach((eventName) =>
+		{
+			const amount = eventDefinition[eventName].getAmount(eventsPtr); // amount of events
+			if (amount => 0)
+			{
+				for (let i = 0; i < amount; i++)
+				{
+					const dataBuffer = eventDefinition[eventName].getData(eventsPtr, i); // get event data
+					this.eventListeners[eventName](dataBuffer); // call the callback
+				}
+			}
+		});
+
+		libtoxcore.tox_events_free(eventsPtr);
 	}
 
 	/**
@@ -49,6 +70,16 @@ class Tox
 	getIterationInterval()
 	{
 		return libtoxcore.tox_iteration_interval(this.tox);
+	}
+
+	/**
+	 * Adds a listener for a given Tox event
+	 * @param {string} eventName
+	 * @param {(data: any) => void} callback
+	 */
+	addEventListener(eventName, callback)
+	{
+		this.eventListeners[eventName] = callback;
 	}
 
 	/**
@@ -310,75 +341,74 @@ class Tox
 	}
 
 	/**
-	 * Received a file transfer request
-	 * @param {(contactId: number, fileId: number, size: number, name: string, isAvatar: boolean) => void} callback
+	 * Received file transfer request from friend
+	 * @param {(friendId: number, fileId: number, size: number, name: string, isAvatar: boolean) => void} callback
 	 */
 	onFileReceive(callback)
 	{
-		const cb = ffi.Callback('void', [types.toxPtr, "int", "int", "int", "int", "string", "size_t", types.userDataPtr],
-		(tox, contactId, fileId, transferType, size, name, nameLength, userData) =>
-		{
-			let isAvatar = false;
-			if (transferType == FileKind.TOX_FILE_KIND_AVATAR.value)
-				isAvatar = true;
+		this.addEventListener("fileRecv", (dataPtr) => {
+			const fileNameBuffer = libtoxcore.tox_event_file_recv_get_filename(dataPtr);
+			const fileNameBufferLength = libtoxcore.tox_event_file_recv_get_filename_length(dataPtr);
+			const fileName = ref.reinterpret(fileNameBuffer, fileNameBufferLength, 0).toString("utf8");
+			const fileId = libtoxcore.tox_event_file_recv_get_file_number(dataPtr);
+			const fileSize = libtoxcore.tox_event_file_recv_get_file_size(dataPtr);
+			const friendId = libtoxcore.tox_event_file_recv_get_friend_number(dataPtr);
+			const fileKind = libtoxcore.tox_event_file_recv_get_kind(dataPtr);
+			const isAvatar = fileKind == FileKind.TOX_FILE_KIND_AVATAR.value;
 
-			callback(contactId, fileId, size, name, isAvatar);
-		});
-
-		libtoxcore.tox_callback_file_recv(this.tox, cb);
-		process.on("exit", () =>
-		{
-			cb
+			callback(friendId, fileId, fileSize, fileName, isAvatar);
 		});
 	}
 
 	/**
-	 * Received a file chunk from file transfer
-	 * @param {(contactId: number, fileId: number, position: number, data: Buffer, length: number) => void} callback
+	 * Received a file chunk from friend
+	 * @param {(friendId: number, fileId: number, position: number, data: Buffer, length: number) => void} callback
 	 */
 	onFileReceiveChunk(callback)
 	{
-		const cb = ffi.Callback('void', [types.toxPtr, "int", "int", "int", "pointer", "size_t", types.userDataPtr],
-		(tox, contactId, fileId, position, data, length, userData) =>
-		{
-			let dataPtr;
+		this.addEventListener("fileRecvChunk", (dataPtr) => {
+			const chunkDataPtr = libtoxcore.tox_event_file_recv_chunk_get_data(dataPtr);
+			const chunkLength = libtoxcore.tox_event_file_recv_chunk_get_length(dataPtr);
+			const fileId = libtoxcore.tox_event_file_recv_chunk_get_file_number(dataPtr);
+			const friendId = libtoxcore.tox_event_file_recv_chunk_get_friend_number(dataPtr);
+			const position = libtoxcore.tox_event_file_recv_chunk_get_position(dataPtr);
+			let fileDataPtr;
 
-			if (length > 0) // length is 0 on final chunk and then data is null
-				dataPtr = Buffer.from(ref.reinterpret(data, length));
+			if (chunkLength > 0) // on final chunk length is 0 and data is null
+				fileDataPtr = Buffer.from(ref.reinterpret(chunkDataPtr, chunkLength));
 
-			callback(contactId, fileId, position, dataPtr, length);
-		});
-
-		libtoxcore.tox_callback_file_recv_chunk(this.tox, cb);
-		process.on("exit", () =>
-		{
-			cb
+			callback(friendId, fileId, position, fileDataPtr, chunkLength);
 		});
 	}
 
 	/**
-	 * @param {(tox: any, contactId: number, fileId: number, messageType: number, userData: any) => void} callback
+	 * Received a file control message from friend
+	 * @param {(friendId: number, fileId: number, messageType: number) => void} callback
 	 */
 	onFileReceiveControlMsg(callback)
 	{
-		const cb = ffi.Callback('void', [types.toxPtr, "int", "int", "int", types.userDataPtr], callback);
-		libtoxcore.tox_callback_file_recv_control(this.tox, cb);
-		process.on("exit", () =>
-		{
-			cb
+		this.addEventListener("fileRecvControl", (dataPtr) => {
+			const friendId = libtoxcore.tox_event_file_recv_control_get_friend_number(dataPtr);
+			const fileId = libtoxcore.tox_event_file_recv_control_get_file_number(dataPtr);
+			const messageType = libtoxcore.tox_event_file_recv_control_get_control(dataPtr);
+
+			callback(friendId, fileId, messageType);
 		});
 	}
 
 	/**
-	 * @param {(tox: any, contactId: number, fileId: number, position: number, size: number, userData: any) => void} callback
+	 * Received a file chunk request from friend
+	 * @param {(friendId: number, fileId: number, position: number, size: number) => void} callback
 	 */
 	onFileReceiveChunkRequest(callback)
 	{
-		const cb = ffi.Callback('void', [types.toxPtr, "int", "int", "int", "size_t", types.userDataPtr], callback);
-		libtoxcore.tox_callback_file_chunk_request(this.tox, cb);
-		process.on("exit", () =>
-		{
-			cb
+		this.addEventListener("fileChunkRequest", (dataPtr) => {
+			const friendId = libtoxcore.tox_event_file_chunk_request_get_friend_number(dataPtr);
+			const fileId = libtoxcore.tox_event_file_chunk_request_get_file_number(dataPtr);
+			const position = libtoxcore.tox_event_file_chunk_request_get_position(dataPtr);
+			const size = libtoxcore.tox_event_file_chunk_request_get_length(dataPtr);
+
+			callback(friendId, fileId, position, size);
 		});
 	}
 

@@ -62,7 +62,7 @@ class Client
 		try
 		{
 			await Client.sleep(this.tox.getIterationInterval());
-			this.tox.iterate();
+			this.tox.eventsIterate();
 			this.loop();
 
 		} catch (e)
@@ -161,7 +161,7 @@ class Client
 		// setup callbacks
 		let self = this;
 		this.tox.onConnectionStatusChange((tox, connectionStatus, userData) =>
-			this.connectionStatusChanged(tox, connectionStatus, userData, self)
+			this.connectionStatusChanged(connectionStatus)
 		);
 		this.tox.onFriendRequest((tox, publicKey, message, length, userData) =>
 			this.friendRequestReceived(tox, publicKey, message, length, userData, self)
@@ -178,20 +178,20 @@ class Client
 		this.tox.onFriendConnectionStatusChange((tox, id, connectionStatus, userData) =>
 			this.friendConnectionStatusChanged(tox, id, connectionStatus, userData, self)
 		);
-		this.tox.onFileReceive((contactId, fileId, size, name, isAvatar) =>
-			this.fileReceived(contactId, fileId, size, name, isAvatar, self)
+		this.tox.onFileReceiveControlMsg((friendId, fileId, messageType) =>
+			this.fileReceivedControlMsg(friendId, fileId, messageType)
 		);
-		this.tox.onFileReceiveChunk((contactId, fileId, position, data, length) =>
-			this.fileReceivedChunk(contactId, fileId, position, data, length, self)
-		);
-		this.tox.onFileReceiveControlMsg((tox, contactId, fileId, messageType, userData) =>
-			this.fileReceivedControlMsg(tox, contactId, fileId, messageType, userData, self)
-		);
-		this.tox.onFileReceiveChunkRequest((tox, contactId, fileId, position, size, userData) =>
-			this.fileReceivedChunkRequest(tox, contactId, fileId, position, size, userData, self)
+		this.tox.onFileReceiveChunkRequest((friendId, fileId, position, size) =>
+			this.fileReceivedChunkRequest(friendId, fileId, position, size)
 		);
 		this.tox.onMessageReceive((tox, contactId, messageType, message, length, userData) =>
 			this.messageReceived(tox, contactId, messageType, message, length, userData, self)
+		);
+		this.tox.onFileReceive((friendId, fileId, fileSize, fileName, isAvatar) =>
+			this.fileReceived(friendId, fileId, fileSize, fileName, isAvatar)
+		);
+		this.tox.onFileReceiveChunk((friendId, fileId, position, fileDataPtr, chunkLength) =>
+			this.fileReceivedChunk(friendId, fileId, position, fileDataPtr, chunkLength)
 		);
 
 		// connect to DHT
@@ -222,23 +222,23 @@ class Client
 	}
 
 	// we have connected / disconnected
-	connectionStatusChanged(tox, connectionStatus, userData, self)
+	connectionStatusChanged(connectionStatus)
 	{
-		if (connectionStatus != ToxConnection.TOX_CONNECTION_NONE.value && self.prevConnection == ToxConnection.TOX_CONNECTION_NONE.value)
+		if (connectionStatus != ToxConnection.TOX_CONNECTION_NONE.value && this.prevConnection == ToxConnection.TOX_CONNECTION_NONE.value)
 		{
 			console.log("Connected to DHT");
-			self.isConnected = true;
+			this.isConnected = true;
 
-		} else if (connectionStatus == ToxConnection.TOX_CONNECTION_NONE.value && self.prevConnection != ToxConnection.TOX_CONNECTION_NONE.value)
+		} else if (connectionStatus == ToxConnection.TOX_CONNECTION_NONE.value && this.prevConnection != ToxConnection.TOX_CONNECTION_NONE.value)
 		{
 			console.log("Disconnected");
-			self.isConnected = false;
+			this.isConnected = false;
 		}
 
-		self.prevConnection = connectionStatus;
+		this.prevConnection = connectionStatus;
 
 		const status = this.tox.getStatus();
-		self.window.webContents.send("status-change", {connectionStatus, status});
+		this.window.webContents.send("status-change", {connectionStatus, status});
 	}
 
 	friendRequestReceived(tox, publicKey, message, length, userData, self)
@@ -331,15 +331,15 @@ class Client
 		}
 	}
 
-	// file transfer was initiated by our contact
-	fileReceived(contactId, fileId, size, name, isAvatar, self)
+	// file transfer was initiated by friend
+	fileReceived(friendId, fileId, size, name, isAvatar)
 	{
 		console.log("Incoming file transfer", name);
 
 		// reject if auto-rejection is enabled
 		if ((this.config.fileTransfers.rejectFiles && !isAvatar) || this.config.fileTransfers.rejectAvatars && isAvatar)
 		{
-			self.tox.rejectFileTransfer(contactId, fileId);
+			this.tox.rejectFileTransfer(friendId, fileId);
 			return;
 		}
 
@@ -350,11 +350,11 @@ class Client
 			if (size > MAX_AVATAR_SIZE)
 			{
 				console.log("Incoming avatar file is too big, rejecting");
-				self.tox.rejectFileTransfer(contactId, fileId);
+				this.tox.rejectFileTransfer(friendId, fileId);
 				return;
 			}
 
-			const contactPk = self.tox.getContactPublicKey(contactId);
+			const contactPk = this.tox.getContactPublicKey(friendId);
 			name = `${contactPk.toUpperCase()}.png`;
 			saveDir = AVATARS_SAVE_DIR;
 		}
@@ -365,21 +365,20 @@ class Client
 		try
 		{
 			const fd = fs.openSync(filePath, "w");
-			self.fileTransfers.push(new FileTransfer(fileId, fd, safeName, contactId, isAvatar));
-			self.tox.acceptFileTransfer(contactId, fileId);
+			this.fileTransfers.push(new FileTransfer(fileId, fd, safeName, friendId, isAvatar));
+			this.tox.acceptFileTransfer(friendId, fileId);
 		} catch (err)
 		{
 			console.error("Error while trying to access path", err.message);
 		}
 	}
 
-	// receive file chunk - apparently order of packets is guaranteed by toxcore
+	// received file chunk from friend
+	// order of packets is guaranteed by toxcore
 	// on final chunk length is 0 and data is null
-	fileReceivedChunk(contactId, fileId, position, data, length, self)
+	fileReceivedChunk(friendId, fileId, position, data, length)
 	{
-		console.log("Received file chunk", position, length);
-
-		const index = findFileTransferIndex(self.fileTransfers, fileId, contactId);
+		const index = findFileTransferIndex(this.fileTransfers, fileId, friendId);
 		if (index < 0)
 			return;
 
@@ -387,7 +386,7 @@ class Client
 		{
 			try
 			{
-				fs.writeSync(self.fileTransfers[index].fd, data, 0, length, position);
+				fs.writeSync(this.fileTransfers[index].fd, data, 0, length, position);
 			} catch (err)
 			{
 				console.error("Error while writing to disk", err.message);
@@ -395,44 +394,44 @@ class Client
 		} else
 		{
 			console.log("File transfer complete");
-			fs.close(self.fileTransfers[index].fd, (err) =>
+			fs.close(this.fileTransfers[index].fd, (err) =>
 			{
 				if (err)
 					console.error("Error while closing file", err.message);
 
-				if (self.fileTransfers[index].isAvatar)
-					self.window.webContents.send("friend-avatar-receive", {id: contactId});
+				if (this.fileTransfers[index].isAvatar)
+					this.window.webContents.send("friend-avatar-receive", {id: friendId});
 
-				self.fileTransfers.splice(index, 1);
+				this.fileTransfers.splice(index, 1);
 			});
 		}
 	}
 
-	fileReceivedControlMsg(tox, contactId, fileId, messageType, userData, self)
+	// received file control message from friend
+	fileReceivedControlMsg(friendId, fileId, messageType)
 	{
 		console.log("File control message received", FileControl.enums[messageType].key);
 
-		const index = findFileTransferIndex(self.fileTransfers, fileId, contactId);
+		const index = findFileTransferIndex(this.fileTransfers, fileId, friendId);
 		if (index < 0)
 			return;
 
 		if (messageType == FileControl.TOX_FILE_CONTROL_CANCEL.value)
 		{
-			fs.close(self.fileTransfers[index].fd, (err) =>
+			fs.close(this.fileTransfers[index].fd, (err) =>
 			{
 				if (err)
 					console.error("Error while closing file", err.message);
 
-				self.fileTransfers.splice(index, 1);
+				this.fileTransfers.splice(index, 1);
 			});
 		}
 	}
 
-	fileReceivedChunkRequest(tox, contactId, fileId, position, size, userData, self)
+	// received file chunk request from friend
+	fileReceivedChunkRequest(friendId, fileId, position, size)
 	{
-		console.log("Received chunk request", contactId, fileId, position, size);
-
-		const index = findFileTransferIndex(self.fileTransfers, fileId, contactId);
+		const index = findFileTransferIndex(this.fileTransfers, fileId, friendId);
 		if (index < 0)
 			return;
 
@@ -441,8 +440,8 @@ class Client
 			try
 			{
 				const data = Buffer.alloc(size);
-				fs.readSync(self.fileTransfers[index].fd, data, 0, data.length, position);
-				self.tox.sendFileChunk(contactId, fileId, position, data);
+				fs.readSync(this.fileTransfers[index].fd, data, 0, data.length, position);
+				this.tox.sendFileChunk(friendId, fileId, position, data);
 			} catch (err)
 			{
 				console.error("Error while reading from file", err.message);
@@ -451,12 +450,12 @@ class Client
 		{
 			console.log("File sent successfully");
 
-			fs.close(self.fileTransfers[index].fd, (err) =>
+			fs.close(this.fileTransfers[index].fd, (err) =>
 			{
 				if (err)
 					console.error("Error while closing file", err.message);
 
-				self.fileTransfers.splice(index, 1);
+				this.fileTransfers.splice(index, 1);
 			});
 		}
 	}
