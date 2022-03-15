@@ -1,7 +1,7 @@
 const ffi = require("ffi-napi");
 const types = require("./types");
 
-const libtoxcore = ffi.Library("libtoxcore.so.2",
+const libtoxcore = ffi.Library("libtoxcore",
 {
 	"tox_new": [types.toxPtr, [types.toxOptionsPtr, "pointer"]],
 	"tox_iteration_interval": ["int", [types.toxPtr]],
