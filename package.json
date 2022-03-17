@@ -1,35 +1,78 @@
 {
   "name": "ampertox",
+  "productName": "AmperTox",
   "version": "0.1.0",
-  "description": "Encrypted peer to peer messenger and Tox client",
+  "description": "Encrypted peer to peer messenger and Tox client for GNU/Linux, Windows and MacOS",
+  "keywords": [],
+  "license": "GPL",
+  "private": true,
+  "author": {
+    "name": "tox-user",
+    "email": "tox-user@protonmail.com"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/tox-user/AmperTox.git"
+  },
   "main": "app.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "electron .",
     "build": "webpack",
-    "build-prod": "webpack -p",
+    "build-release": "electron-builder",
     "watch": "webpack --watch"
   },
-  "keywords": [],
-  "author": "tox-user",
-  "license": "GPL",
-  "private": true,
   "dependencies": {
     "@fortawesome/fontawesome-free": "^5.15.4",
-    "css-loader": "^5.2.7",
-    "electron": "^16.1.0",
     "enum": "^3.0.4",
     "ffi-napi": "^4.0.3",
-    "file-loader": "^6.2.0",
-    "html-loader": "^2.1.2",
-    "html-webpack-plugin": "^5.5.0",
     "lodash.merge": "^4.6.2",
-    "mini-css-extract-plugin": "^2.6.0",
     "ref-array-di": "^1.2.2",
     "ref-napi": "^3.0.3",
     "ref-struct-di": "^1.1.1",
-    "sqlite3": "npm:@vscode/sqlite3@^5.0.7",
+    "sqlite3": "npm:@vscode/sqlite3@^5.0.7"
+  },
+  "devDependencies": {
+    "css-loader": "^5.2.7",
+    "electron": "^16.1.0",
+    "electron-builder": "^22.14.13",
+    "file-loader": "^6.2.0",
+    "html-loader": "^2.1.2",
+    "html-webpack-plugin": "^5.5.0",
+    "mini-css-extract-plugin": "^2.6.0",
     "webpack": "^5.70.0",
     "webpack-cli": "^4.9.2"
+  },
+  "build": {
+    "appId": "ampertox",
+    "asar": false,
+    "files": [
+      "!config.json",
+      "!docs/",
+      "!src/ui/"
+    ],
+    "directories": {
+      "output": "./build/"
+    },
+    "linux": {
+      "category": "Network;InstantMessaging;Chat",
+      "target": [
+        "deb"
+      ]
+    },
+    "deb": {
+      "depends": [
+        "libtoxcore2"
+      ]
+    },
+    "win": {
+      "target": [
+        "portable"
+      ],
+      "signAndEditExecutable": false
+    },
+    "mac": {
+      "category": "public.app-category.social-networking"
+    }
   }
 }

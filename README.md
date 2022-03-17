@@ -25,9 +25,9 @@ This client is currently in alpha stage. Please **backup your Tox profiles** bef
 npm install
 npm run build
 ```
-For a release build use `npm run build-prod`.
-
 For development you can instead run `npm run watch`. It will rebuild the UI on changes, but you will still need to restart the app to see them.
+
+To make a release build run `npm run build-release`. It will create executables for your platform in `build` directory.
 
 ## Run
 Run `npm run start` to start the app.
