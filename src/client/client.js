@@ -14,6 +14,7 @@ const Message = require("../models/message");
 const path = require("path");
 const FileTransfer = require('../models/fileTransfer');
 const { findFileTransferIndex } = require('./fileTransfer');
+const url = require('url');
 
 const DATA_DIR = path.resolve(app.getPath("appData"), "tox");
 const AVATARS_SAVE_DIR = path.resolve(DATA_DIR, "avatars");
@@ -481,7 +482,7 @@ class Client
 			statusMessage: self.tox.statusMessage,
 			publicKey: self.tox.publicKey,
 			contacts: contacts,
-			avatarsSaveDir: AVATARS_SAVE_DIR,
+			avatarsSaveDir: url.pathToFileURL(AVATARS_SAVE_DIR).toString(),
 			assetsPath: path.resolve(app.getAppPath(), "assets")
 		});
 	}
