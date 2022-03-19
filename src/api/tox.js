@@ -3,6 +3,7 @@ const ffi = require("ffi-napi");
 const types = require("./types");
 const libtoxcore = require("./libtoxcore");
 const fs = require("fs");
+const path = require("path");
 const FileControl = require("../models/tox/fileControl");
 const FileKind = require("../models/tox/fileKind");
 
@@ -138,6 +139,26 @@ class Tox
 		const view = new Uint8Array(buffer);
 		libtoxcore.tox_self_get_status_message(this.tox, view);
 		return Buffer.from(view).toString("utf8");
+	}
+
+	/**
+	 * Find a profile name that isn't used yet
+	 * @param {string} savePath path to the profile save directory
+	 * @param {string} profileName
+	 * @returns {string} unique profile name
+	 */
+	uniqueProfileName(savePath, profileName)
+	{
+		let uniqueName = profileName;
+		let i = 2;
+
+		while (fs.existsSync(path.resolve(savePath, `${uniqueName}.tox`)))
+		{
+			uniqueName = `${profileName} (${i})`;
+			i++;
+		}
+
+		return uniqueName;
 	}
 
 	/**

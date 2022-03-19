@@ -1,6 +1,8 @@
 const fs = require("fs");
 const path = require("path");
-const CONFIG_PATH = path.resolve(__dirname, "../../config.json");
+const merge = require("lodash.merge");
+const USER_CONFIG_PATH = path.resolve(__dirname, "../../config.json");
+const DEFAULT_CONFIG_PATH = path.resolve(__dirname, "defaultConfig.json");
 const ENCODING = "utf8";
 const INDENT_LEVEL = 4;
 
@@ -12,21 +14,32 @@ module.exports =
 	 */
 	load()
 	{
-		// this can be sync because we load config only on client start and we need it before everything else
-		const contents = fs.readFileSync(CONFIG_PATH, ENCODING);
+		// we use sync because we load config only on client start and we need it before everything else
+		if (!fs.existsSync(USER_CONFIG_PATH))
+		{
+			console.log("No config file found, creating a default config file");
+			fs.copyFileSync(DEFAULT_CONFIG_PATH, USER_CONFIG_PATH);
+		}
 
-		let cfg;
+		const defaultConfigJson = fs.readFileSync(DEFAULT_CONFIG_PATH, ENCODING);
+		const userConfigJson = fs.readFileSync(USER_CONFIG_PATH, ENCODING);
+		const defaultConfig = JSON.parse(defaultConfigJson);
+
+		// parse user config
+		let config;
 		try
 		{
-			cfg = JSON.parse(contents);
+			const userConfig = JSON.parse(userConfigJson);
+			config = merge(defaultConfig, userConfig);
 
-		} catch(e)
+		} catch(err)
 		{
-			throw e;
+			console.error("Error in config file");
+			throw err;
 		}
 
 		console.log("Loaded config");
-		return cfg;
+		return config;
 	},
 
 	/**
@@ -43,12 +56,12 @@ module.exports =
 			{
 				dataString = JSON.stringify(data, null, INDENT_LEVEL);
 
-			} catch(e)
+			} catch(err)
 			{
-				throw e;
+				throw err;
 			}
 
-			fs.writeFile(CONFIG_PATH, dataString, ENCODING, (err) =>
+			fs.writeFile(USER_CONFIG_PATH, dataString, ENCODING, (err) =>
 			{
 				if (err)
 					throw err;

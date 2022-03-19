@@ -14,7 +14,8 @@ const Message = require("../models/message");
 const path = require("path");
 const FileTransfer = require('../models/fileTransfer');
 const { findFileTransferIndex } = require('./fileTransfer');
-const url = require('url');
+const url = require("url");
+const ProxyType = require("../models/tox/proxyType");
 
 const DATA_DIR = path.resolve(app.getPath("appData"), "tox");
 const AVATARS_SAVE_DIR = path.resolve(DATA_DIR, "avatars");
@@ -87,10 +88,31 @@ class Client
 	{
 		return new Promise((resolve) =>
 		{
-			let options = new ToxOptions({
+			let proxyType = ProxyType.TOX_PROXY_TYPE_NONE.value;
+			if (this.config.network.proxy.enabled)
+			{
+				switch (this.config.network.proxy.type)
+				{
+					case "socks5":
+						proxyType = ProxyType.TOX_PROXY_TYPE_SOCKS5.value;
+						break;
+					case "http":
+						proxyType = ProxyType.TOX_PROXY_TYPE_HTTP.value;
+						break;
+					default:
+						proxyType = ProxyType.TOX_PROXY_TYPE_NONE.value;
+						break;
+				}
+			}
+
+			const options = new ToxOptions({
 				udp_enabled: this.config.network.udp,
-				local_discovery_enabled: this.config.network.udp,
-				ipv6_enabled: this.config.network.ipv6
+				local_discovery_enabled: this.config.network.udp, // enable local discovery for udp
+				ipv6_enabled: this.config.network.ipv6,
+				proxy_type: proxyType,
+				proxy_host: this.config.network.proxy.address,
+				proxy_port: this.config.network.proxy.port,
+				tcp_port: 0 // disable tcp relay
 			});
 
 			if (this.profileName == "")
@@ -98,11 +120,14 @@ class Client
 			else
 				this.config.lastUsedProfile = this.profileName;
 
+			// if profile name is not provided by the user, we create a new profile
+			// in the future we should show a login screen instead
 			if (this.profileName == "")
 			{
-				this.profileName = "profile";
-				this.config.lastUsedProfile = this.profileName;
 				this.tox = new Tox(options);
+				this.profileName = this.tox.uniqueProfileName(DATA_DIR, "profile");
+				this.config.lastUsedProfile = this.profileName;
+				console.log("Created new profile:", this.profileName);
 				resolve();
 			} else
 			{
@@ -111,14 +136,9 @@ class Client
 				{
 					console.log("Loaded profile");
 
-					options = new ToxOptions({
-						udp_enabled: this.config.network.udp,
-						local_discovery_enabled: this.config.network.udp,
-						ipv6_enabled: this.config.network.ipv6,
-						savedata_type: 1,
-						savedata_length: profileData.length,
-						savedata_data: profileData
-					});
+					options.savedata_type = 1;
+					options.savedata_length = profileData.length;
+					options.savedata_data = profileData;
 
 					this.tox = new Tox(options);
 					resolve();

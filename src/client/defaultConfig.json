@@ -1,0 +1,13 @@
+{
+    "lastUsedProfile": "",
+    "network": {
+        "udp": true,
+        "ipv6": true,
+		"proxy": {
+			"enabled": false,
+			"type": "socks5",
+			"address": "127.0.0.1",
+			"port": 9050
+		}
+    }
+}

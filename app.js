@@ -9,7 +9,8 @@ function parseArgs()
 {
 	for (let i = 0; i < process.argv.length; i++)
 	{
-		if (process.argv[i] == "--profile" && i + 1 < process.argv.length)
+		const curArg = process.argv[i];
+		if (curArg == "--profile" || curArg == "-p" && i + 1 < process.argv.length)
 		{
 			profileName = process.argv[i + 1];
 		}

@@ -16,6 +16,7 @@ This client is currently in alpha stage. Please **backup your Tox profiles** bef
 ## Prerequisites
 - [toxcore](https://github.com/TokTok/c-toxcore)
 - [Node.js 14.x](https://nodejs.org)
+- [Python](https://python.org)
 
 ## Build from source
 ```
