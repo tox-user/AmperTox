@@ -334,6 +334,13 @@ class Client
 	{
 		console.log("Incoming file transfer", name);
 
+		// reject if auto-rejection is enabled
+		if ((this.config.fileTransfers.rejectFiles && !isAvatar) || this.config.fileTransfers.rejectAvatars && isAvatar)
+		{
+			self.tox.rejectFileTransfer(contactId, fileId);
+			return;
+		}
+
 		let saveDir = DOWNLOAD_DIR;
 		if (isAvatar)
 		{

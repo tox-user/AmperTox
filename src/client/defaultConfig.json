@@ -9,5 +9,9 @@
 			"address": "127.0.0.1",
 			"port": 9050
 		}
-    }
+    },
+	"fileTransfers": {
+		"rejectFiles": false,
+		"rejectAvatars": false
+	}
 }
