@@ -408,13 +408,13 @@ class Client
 
 	fileReceivedControlMsg(tox, contactId, fileId, messageType, userData, self)
 	{
-		console.log("File control message received", messageType);
+		console.log("File control message received", FileControl.enums[messageType].key);
 
 		const index = findFileTransferIndex(self.fileTransfers, fileId, contactId);
 		if (index < 0)
 			return;
 
-		if (messageType == FileControl.TOX_FILE_CONTROL_CANCEL)
+		if (messageType == FileControl.TOX_FILE_CONTROL_CANCEL.value)
 		{
 			fs.close(self.fileTransfers[index].fd, (err) =>
 			{

@@ -396,7 +396,7 @@ class Tox
 	 */
 	sendFileControlMsg(contactId, fileId, type)
 	{
-		console.log("sending control", contactId, fileId, type);
+		console.log("Sending control", contactId, fileId, FileControl.enums[type].key);
 		const error = ref.alloc("int");
 		return libtoxcore.tox_file_control(this.tox, contactId, fileId, type, error);
 	}

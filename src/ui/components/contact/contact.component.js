@@ -1,7 +1,7 @@
 import Component from "../component.js";
 import htmlTemplate from "./contact.component.html";
 import stylesheet from "!!css-loader!./contact.component.css";
-import UserStatus from "../userStatus/userStatus";
+import UserStatusComponent from "../userStatus/userStatus.component";
 
 class ContactComponent extends Component
 {
@@ -24,14 +24,13 @@ class ContactComponent extends Component
 			this.dispatchEvent(event);
 		});
 
-		// DEBUG
 		// TODO: add proper context menu with a button to remove contact
-		this.element.addEventListener("contextmenu", () => {
-			console.log("removing contact");
-			window.ipc.send("remove-contact", {contactId: contact.id});
-		});
+		// this.element.addEventListener("contextmenu", () => {
+		// 	console.log("removing contact");
+		// 	window.ipc.send("remove-contact", {contactId: contact.id});
+		// });
 
-		const statusComponent = new UserStatus();
+		const statusComponent = new UserStatusComponent();
 		statusComponent.update(this.contact);
 		statusComponent.className = "contact-status";
 		this.statusElement = statusComponent;

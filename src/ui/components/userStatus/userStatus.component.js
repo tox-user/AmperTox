@@ -1,9 +1,9 @@
 import Component from "../component";
-import htmlTemplate from "./userStatus.html";
-import stylesheet from "!!css-loader!./userStatus.css";
+import htmlTemplate from "./userStatus.component.html";
+import stylesheet from "!!css-loader!./userStatus.component.css";
 import { Status, statusToString } from "../../status";
 
-class UserStatus extends Component
+class UserStatusComponent extends Component
 {
 	/**
 	 * UserStatus component
@@ -43,4 +43,4 @@ class UserStatus extends Component
 	}
 }
 
-export default UserStatus;
+export default UserStatusComponent;

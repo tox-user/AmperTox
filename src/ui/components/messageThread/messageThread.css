@@ -11,6 +11,7 @@
 .thread .header .avatar
 {
 	min-width: 30px;
+	max-width: 30px;
 	height: 30px;
 }
 
@@ -24,6 +25,6 @@
 
 .thread .header .date
 {
-	color: var(--text-dark);
+	color: var(--text-darker);
 	font-size: 14px;
 }

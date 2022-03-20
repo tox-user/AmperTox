@@ -24,7 +24,7 @@
 
 .date
 {
-	color: var(--text-dark);
+	color: var(--text-darker);
 	font-size: 14px;
 	visibility: hidden;
 }

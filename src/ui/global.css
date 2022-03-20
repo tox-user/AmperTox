@@ -15,6 +15,7 @@
 	--link: #51cee4;
 	--text: rgba(255, 255, 255, 0.8);
 	--text-dark: rgba(255, 255, 255, 0.6);
+	--text-darker: rgba(255, 255, 255, 0.4);
 	--text-success: rgb(133, 221, 98);
 	--text-danger: rgb(231, 110, 88);
 	--offline: rgba(255, 255, 255, 0.5);
@@ -121,6 +122,7 @@ ul
 	outline: none;
 	background: transparent;
 	user-select: none;
+	white-space: nowrap;
 }
 
 .btn:disabled
@@ -262,6 +264,7 @@ ul
 	background-size: cover;
 	border-radius: 5px;
 	min-width: 40px;
+	max-width: 40px;
 	height: 40px;
 }
 

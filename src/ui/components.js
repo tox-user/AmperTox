@@ -4,7 +4,7 @@ import Chatbox from "./components/chatbox/chatbox";
 import Chatlog from "./components/chatlog/chatlog";
 import MessageComponent from "./components/message/message.component";
 import Messenger from "./views/messenger/messenger";
-import UserStatus from "./components/userStatus/userStatus";
+import UserStatusComponent from "./components/userStatus/userStatus.component";
 import MessageThread from "./components/messageThread/messageThread";
 import Welcome from "./views/welcome/welcome";
 import ModalComponent from "./components/modal/modal.component";
@@ -21,7 +21,7 @@ const components = [
 	{selector: "ui-chatlog", component: Chatlog},
 	{selector: "ui-message", component: MessageComponent},
 	{selector: "ui-messenger", component: Messenger},
-	{selector: "ui-user-status", component: UserStatus},
+	{selector: "ui-user-status", component: UserStatusComponent},
 	{selector: "ui-message-thread", component: MessageThread},
 	{selector: "ui-welcome", component: Welcome},
 	{selector: "ui-modal", component: ModalComponent},
