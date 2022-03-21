@@ -1,6 +1,8 @@
 # AmperTox <img align="left" src="assets/icon/128.png?raw=true" alt="Logo" width="40" height="40">
 
-Encrypted peer to peer messenger and Tox client.
+Encrypted peer to peer messenger and Tox client for GNU/Linux, Windows and MacOS.
+
+![screenshot](docs/screenshot.png)
 
 Current features:
 - 1 on 1 messaging
