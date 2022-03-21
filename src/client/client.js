@@ -236,7 +236,9 @@ class Client
 		}
 
 		self.prevConnection = connectionStatus;
-		self.window.webContents.send("connection-status-change", connectionStatus);
+
+		const status = this.tox.getStatus();
+		self.window.webContents.send("status-change", {connectionStatus, status});
 	}
 
 	friendRequestReceived(tox, publicKey, message, length, userData, self)

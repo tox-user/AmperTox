@@ -142,6 +142,15 @@ class Tox
 	}
 
 	/**
+	 * Gets this Tox instance's status
+	 * @returns {number} status - one of the values defined in TOX_USER_STATUS
+	 */
+	getStatus()
+	{
+		return libtoxcore.tox_self_get_status(this.tox);
+	}
+
+	/**
 	 * Find a profile name that isn't used yet
 	 * @param {string} savePath path to the profile save directory
 	 * @param {string} profileName

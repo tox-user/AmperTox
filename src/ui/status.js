@@ -8,9 +8,10 @@ const Status = {
 /**
  * Returns a display name for specified status
  * @param {number} status
+ * @param {boolean} self is our user
  * @returns {string} status display name
  */
-function statusToString(status)
+function statusToString(status, self=false)
 {
 	switch(status)
 	{
@@ -21,7 +22,10 @@ function statusToString(status)
 		case Status.BUSY:
 			return "Busy";
 		default:
-			return "Offline";
+			if (self)
+				return "Connecting";
+			else
+				return "Offline";
 	}
 }
 
