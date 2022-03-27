@@ -20,7 +20,7 @@ function parseArgs()
 function createWindow()
 {
 	const win = new BrowserWindow({
-		width: 1024,
+		width: 1200,
 		height: 768,
 		icon: path.resolve(__dirname, "assets/icon/128.png"),
 		autoHideMenuBar: true,

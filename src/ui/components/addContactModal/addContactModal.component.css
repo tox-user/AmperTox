@@ -26,3 +26,13 @@
 {
 	align-self: center;
 }
+
+@media(max-width: 600px)
+{
+	.add-contact-modal
+	{
+		padding-top: 0;
+		padding-left: 0;
+		padding-right: 0;
+	}
+}

@@ -45,10 +45,10 @@
 	height: 100%;
 }
 
-@media(max-width: 400px)
+@media(max-width: 600px)
 {
 	.modal
 	{
-		padding: 5vh 5vw;
+		padding: 0;
 	}
 }

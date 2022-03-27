@@ -2,11 +2,11 @@ import Component from "../component.js";
 import htmlTemplate from "./contactList.html";
 import stylesheet from "!!css-loader!./contactList.css";
 import ContactComponent from "../contact/contact.component";
+/** @typedef {import('../../../models/contact')} Contact */
 
 class ContactList extends Component
 {
 	/**
-	 * @typedef {import('../../../models/contact')} Contact
 	 * @param {Contact[]} contactList
 	 */
 	constructor(contactList = [])
@@ -125,7 +125,7 @@ class ContactList extends Component
 	}
 
 	/**
-	 * @param {*} e event
+	 * @param {any} e event
 	 */
 	contactSelected(e)
 	{

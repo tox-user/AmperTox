@@ -107,6 +107,14 @@
 	color: rgba(255, 255, 255, 0.65);
 }
 
+@media(max-width: 600px)
+{
+	.contacts
+	{
+		width: 100vw;
+	}
+}
+
 @media(max-width: 800px)
 {
 	.search

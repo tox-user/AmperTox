@@ -7,10 +7,10 @@ class Messenger extends Component
 	constructor()
 	{
 		super(htmlTemplate, stylesheet);
-		this.contact = null;
-		this.isVisible = false;
-		this.element = this.shadowRoot.querySelector(".messenger");
+		this.hide(); // hide on client start
 
+		this.contact = null;
+		this.element = this.shadowRoot.querySelector(".messenger");
 		this.chatlog = this.shadowRoot.querySelector("#chatlog");
 		this.chatbox = this.shadowRoot.querySelector("#chatbox");
 		this.chatbox.addEventListener("sendmessage", (e) =>
@@ -51,12 +51,6 @@ class Messenger extends Component
 		window.ipc.on("friend-name-change", (partialContact) => this.updateContactOnEvent(partialContact));
 		window.ipc.on("friend-connection-status-change", (partialContact) => this.updateContactOnEvent(partialContact));
 		window.ipc.on("friend-avatar-receive", (partialContact) => this.draw());
-	}
-
-	show()
-	{
-		this.isVisible = true;
-		this.element.classList.remove("hidden");
 	}
 
 	draw()

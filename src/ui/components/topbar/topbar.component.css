@@ -5,6 +5,29 @@
 	background-color: rgba(0, 0, 0, 0.2);
 }
 
+.topbar .app-menu
+{
+	display: flex;
+	flex-direction: row;
+}
+
+.topbar .app-menu .mobile-only
+{
+	position: relative;
+}
+
+.topbar .app-menu .mobile-only .mobile-message-notification
+{
+    background: var(--primary);
+    padding: 2px 4px;
+    color: white;
+    border-radius: 50px;
+    position: absolute;
+    top: 14px;
+    right: 4px;
+    font-size: 12px;
+}
+
 .topbar .notifications
 {
 	display: flex;
@@ -16,4 +39,18 @@
 {
 	padding: 0px 10px;
 	margin-right: 10px;
+}
+
+@media(max-width: 600px)
+{
+	.topbar .app-menu
+	{
+		justify-content: space-evenly;
+		flex: 1;
+	}
+
+	.topbar .app-menu .item-name
+	{
+		display: none;
+	}
 }

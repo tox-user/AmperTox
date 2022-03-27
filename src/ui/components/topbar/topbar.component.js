@@ -15,6 +15,10 @@ class TopbarComponent extends Component
 			document.querySelector("#add-contact-modal").show();
 		});
 
+		this.shadowRoot.querySelector("#show-sidebar-btn").addEventListener("click", () => {
+			this.dispatchEvent(new CustomEvent("sidebaropen"));
+		});
+
 		this.requestNotificationBtn.addEventListener("click", () => {
 			document.querySelector("#pending-invites-modal").show();
 		});

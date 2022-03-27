@@ -310,3 +310,11 @@ ul
 	from {transform: rotate(0deg);}
 	to {transform: rotate(360deg);}
 }
+
+@media(min-width: calc(600px + 1px))
+{
+	.mobile-only
+	{
+		display: none;
+	}
+}

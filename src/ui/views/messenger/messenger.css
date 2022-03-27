@@ -98,6 +98,19 @@
 	flex: 1;
 }
 
+@media(max-width: 600px)
+{
+	.messenger
+	{
+		width: 100vw;
+	}
+
+	.messenger .actions .btn
+	{
+		padding: 5px 10px;
+	}
+}
+
 @media(max-width: 850px)
 {
 	.messenger .actions .action-name

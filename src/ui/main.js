@@ -1,8 +1,11 @@
 import "./index.css";
 import initComponents from "./components";
+const MOBILE_WIDTH = 600;
 const messenger = document.querySelector("#messenger");
 const welcome = document.querySelector("#welcome");
 const sidebar = document.querySelector("ui-sidebar");
+const topbar = document.querySelector("ui-topbar");
+const view = document.querySelector(".view");
 let username = "";
 let publicKey = "";
 let assetsPath = "";
@@ -20,12 +23,13 @@ function loadInitialData(data)
 function contactSelected(e)
 {
 	messenger.updateContact(e.detail);
+	showView();
+	messenger.show();
+	welcome.hide();
 
-	if (!messenger.isVisible)
-	{
-		messenger.show();
-		welcome.hide();
-	}
+	// mobile layout
+	if (window.innerWidth <= MOBILE_WIDTH)
+		sidebar.hide();
 }
 
 function loadMessages(messages)
@@ -69,6 +73,18 @@ function sendFile(e)
 	messenger.addMessage(message);
 }
 
+function hideView()
+{
+	if (!view.classList.contains("hidden"))
+		view.classList.add("hidden");
+}
+
+function showView()
+{
+	if (view.classList.contains("hidden"))
+		view.classList.remove("hidden");
+}
+
 window.ipc.on("data", (data) => loadInitialData(data));
 window.ipc.on("messages-loaded", (messages) => loadMessages(messages));
 window.ipc.send("data-request");
@@ -76,3 +92,25 @@ initComponents();
 sidebar.contactListElement.addEventListener("contactselect", contactSelected);
 messenger.addEventListener("sendmessage", sendMessage);
 messenger.addEventListener("sendfile", sendFile);
+
+// mobile layout
+window.addEventListener("resize", () =>
+{
+	if (window.innerWidth <= MOBILE_WIDTH && messenger.isVisible)
+	{
+		sidebar.hide();
+		showView();
+	} else if (window.innerWidth > MOBILE_WIDTH)
+	{
+		sidebar.show();
+		showView();
+	}
+});
+topbar.addEventListener("sidebaropen", () =>
+{
+	hideView();
+	messenger.hide();
+	welcome.show();
+	sidebar.show();
+	sidebar.contactListElement.update(sidebar.contactListElement.contactList, null); // clear selected contact
+});

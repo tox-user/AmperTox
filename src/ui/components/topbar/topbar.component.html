@@ -1,15 +1,17 @@
 <div class="topbar flex-row justify-between">
-	<div class="flex-row">
-		<button class="btn"><i class="fas fa-user-cog"></i> Profile</button>
-		<button class="btn" id="add-contact-btn"><i class="fas fa-user-plus"></i> Add Friend</button>
-		<!-- <button class="btn" title="New Group"><i class="fas fa-users"></i> New Group</button> -->
-		<button class="btn"><i class="fas fa-cog"></i> Settings</button>
+	<div class="app-menu">
+		<button class="btn mobile-only" id="show-sidebar-btn"><i class="fas fa-user-friends"></i>
+			<!-- <div class="mobile-message-notification" ><i class="fas fa-envelope"></i></div> -->
+		</button>
+		<button class="btn"><i class="fas fa-user-cog"></i> <span class="item-name">Profile</span></button>
+		<button class="btn" id="add-contact-btn"><i class="fas fa-user-plus"></i> <span class="item-name">Add Friend</span></button>
+		<!-- <button class="btn" title="New Group"><i class="fas fa-users"></i> <span class="item-name">New Group</span></button> -->
+		<button class="btn"><i class="fas fa-cog"></i> <span class="item-name">Settings</span></button>
 	</div>
 
 	<div class="notifications">
 		<button class="btn btn-primary request-notification-btn hidden" title="You have new friend requests">
 			<span class="notification-btn-title"></span> <i class="fas fa-user-plus"></i>
 		</button>
-		<!-- <button class="btn btn-primary" style="padding: 5px 10px;">+2 <i class="fas fa-envelope"></i></button> -->
 	</div>
 </div>

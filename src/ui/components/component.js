@@ -21,25 +21,22 @@ class Component extends HTMLElement
 			this.shadowRoot.append(styleElement);
 		}
 
-		// this.element = element.content.cloneNode(true);
 		this.shadowRoot.append(element.content.cloneNode(true));
-		// this.isVisible = true;
+		this.isVisible = true;
 	}
 
-	// show()
-	// {
-	// 	this.isVisible = true;
-	// 	if (this.element.classList.contains("hidden"))
-	// 		this.element.classList.remove("hidden");
-	// }
+	show()
+	{
+		this.isVisible = true;
+		this.classList.remove("hidden");
+	}
 
-	// hide()
-	// {
-	// 	this.isVisible = false;
-	// 	console.log(this.shadowRoot, this.shadowRoot.classList);
-	// 	if (!this.element.classList.contains("hidden"))
-	// 		this.element.classList.add("hidden");
-	// }
+	hide()
+	{
+		this.isVisible = false;
+		if (!this.classList.contains("hidden"))
+			this.classList.add("hidden");
+	}
 }
 
 export default Component;
