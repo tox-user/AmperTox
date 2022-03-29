@@ -30,8 +30,12 @@ function createWindow()
 		icon: path.resolve(__dirname, "assets/icon/128.png"),
 		autoHideMenuBar: true,
 		backgroundColor: "#1a1715",
-		frame: !useCustomTitleBar,
-		titleBarOverlay: useCustomTitleBar,
+		titleBarStyle: useCustomTitleBar ? "hidden" : "default",
+		titleBarOverlay: useCustomTitleBar ? {
+			color: "#151211",
+			symbolColor: "white",
+			height: 33
+		} : false,
 		webPreferences:
 		{
 			nodeIntegration: false,

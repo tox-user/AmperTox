@@ -10,6 +10,7 @@
 {
 	display: flex;
 	flex-direction: row;
+	-webkit-app-region: no-drag;
 }
 
 .topbar .app-menu .mobile-only
