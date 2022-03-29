@@ -19,12 +19,19 @@ function parseArgs()
 
 function createWindow()
 {
+	// use a custom title bar with native window controls
+	// unfortunately Electron doesn't add such controls on GNU/Linux
+	// so we can only use a custom title bar on Windows and MacOS
+	const useCustomTitleBar = process.platform == "win32" || process.platform == "darwin";
+
 	const win = new BrowserWindow({
 		width: 1200,
 		height: 768,
 		icon: path.resolve(__dirname, "assets/icon/128.png"),
 		autoHideMenuBar: true,
 		backgroundColor: "#1a1715",
+		frame: !useCustomTitleBar,
+		titleBarOverlay: useCustomTitleBar,
 		webPreferences:
 		{
 			nodeIntegration: false,
