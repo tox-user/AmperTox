@@ -21,6 +21,14 @@
 	flex-direction: row;
 	align-items: center;
 	gap: 10px;
+	overflow: hidden;
+}
+
+.thread .header .text .name
+{
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
 }
 
 .thread .header .date

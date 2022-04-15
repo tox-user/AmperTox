@@ -2,6 +2,7 @@ import Component from "../component";
 import htmlTemplate from "./chatlog.html";
 import stylesheet from "!!css-loader!./chatlog.css";
 import MessageThread from "../messageThread/messageThread";
+import {hasMinutesDifference} from '../../dateUtils';
 
 class Chatlog extends Component
 {
@@ -40,9 +41,9 @@ class Chatlog extends Component
 		let lastContactId = self.lastContactId;
 		let thread = self.lastThread;
 		let contact = {...self.contact};
-		const isSameDay = message.date.getDate() == self.lastDate.getDate();
+		const hasEnoughTimePassed = hasMinutesDifference(5, message.date, self.lastDate);
 
-		if (message.contactId != lastContactId || !isSameDay)
+		if (message.contactId != lastContactId || hasEnoughTimePassed)
 		{
 			if (message.contactId == -1)
 			{
