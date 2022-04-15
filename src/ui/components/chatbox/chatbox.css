@@ -23,13 +23,6 @@
 	max-height: 50vh;
 }
 
-.chatbox .send-btn
-{
-	/* margin-left: 10px; */
-	/* margin-left: 5px; */
-	/* margin-bottom: 5px; */
-}
-
 .chatbox .col
 {
 	display: flex;
@@ -39,8 +32,6 @@
 .chatbox button
 {
 	margin-left: 5px;
-	/* padding-left: 20px;
-	padding-right: 20px; */
 }
 
 .chatbox .emoji-btn,

@@ -29,11 +29,11 @@ function createWindow()
 		height: 768,
 		icon: path.resolve(__dirname, "assets/icon/128.png"),
 		autoHideMenuBar: true,
-		backgroundColor: "#1a1715",
+		backgroundColor: "rgb(26, 24, 23)",
 		titleBarStyle: useCustomTitleBar ? "hidden" : "default",
 		titleBarOverlay: useCustomTitleBar ? {
-			color: "#151211",
-			symbolColor: "white",
+			color: "rgb(15, 14, 13)",
+			symbolColor: "rgba(255, 255, 255, 0.7)",
 			height: 33
 		} : false,
 		webPreferences:

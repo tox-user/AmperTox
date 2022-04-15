@@ -2,10 +2,10 @@
 
 :root
 {
-	--primary: #1168c0;
-	--primary-light: #1672ce;
-	--primary-dark: #0e5ead;
-	--secondary: #1e7585;
+	--primary: #0e5dac;
+	--primary-light: #1168c0;
+	--primary-dark: #0b549c;
+	--secondary: #1a6674;
 	--secondary-light: #218091;
 	--secondary-dark: #1a6674;
 	--warning: rgb(226, 197, 101);
@@ -19,9 +19,9 @@
 	--text-success: rgb(133, 221, 98);
 	--text-danger: rgb(231, 110, 88);
 	--offline: rgba(255, 255, 255, 0.5);
-	--background-alt: rgb(32, 29, 26);
-	--background: rgb(26, 23, 21);
-	--skeleton: rgb(58, 53, 45);
+	--background-alt: rgb(31, 29, 28);
+	--background: rgb(26, 24, 23);
+	--avatar-bg: rgb(58, 53, 45);
 	--modal-bg: rgb(27, 27, 27);
 	--modal-border: rgb(22, 22, 22);
 }
@@ -128,7 +128,6 @@ ul
 .btn:disabled
 {
 	pointer-events: none;
-	background-color: #273849;
 	color: rgba(255, 255, 255, 0.5);
 }
 
@@ -176,6 +175,11 @@ ul
 .btn-secondary:active
 {
 	background: var(--secondary-dark);
+}
+
+.btn-primary:disabled, .btn-secondary:disabled
+{
+	background-color: #29333d;
 }
 
 .btn-danger
@@ -260,7 +264,7 @@ ul
 
 .avatar
 {
-	background: var(--skeleton);
+	background: var(--avatar-bg);
 	background-size: cover;
 	border-radius: 5px;
 	min-width: 40px;
@@ -303,6 +307,16 @@ ul
 .items-end
 {
 	align-items: flex-end;
+}
+
+.relative
+{
+	position: relative;
+}
+
+.absolute
+{
+	position: absolute;
 }
 
 @keyframes spin

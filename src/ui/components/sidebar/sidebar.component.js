@@ -14,6 +14,10 @@ class SidebarComponent extends Component
 		this.avatarElement = this.shadowRoot.querySelector(".user-avatar");
 		this.contactListElement = this.shadowRoot.querySelector("#contact-list");
 
+		this.shadowRoot.querySelector("#add-friend-btn").addEventListener("click", () => {
+			document.querySelector("#add-contact-modal").show();
+		});
+
 		this.connectionStatusElement.update({connectionStatus: 0, status: 0}); // set initial offline status
 		window.ipc.on("status-change", (data) => this.connectionStatusElement.update(data));
 		window.ipc.on("data", (data) =>

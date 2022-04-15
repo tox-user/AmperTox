@@ -34,9 +34,7 @@ class ContactComponent extends Component
 		statusComponent.update(this.contact);
 		statusComponent.className = "contact-status";
 		this.statusElement = statusComponent;
-
-		const notificationIcon = this.element.querySelector(".notification-icon");
-		notificationIcon.parentNode.insertBefore(statusComponent, notificationIcon);
+		this.element.querySelector(".contact-info-container").appendChild(this.statusElement);
 
 		this.avatarElement = this.shadowRoot.querySelector(".avatar");
 

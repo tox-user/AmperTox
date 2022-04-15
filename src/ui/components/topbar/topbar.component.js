@@ -11,10 +11,6 @@ class TopbarComponent extends Component
 		this.requestNotificationBtn = this.shadowRoot.querySelector(".request-notification-btn");
 		this.notificationBtnTitle = this.requestNotificationBtn.querySelector(".notification-btn-title");
 
-		this.shadowRoot.querySelector("#add-contact-btn").addEventListener("click", () => {
-			document.querySelector("#add-contact-modal").show();
-		});
-
 		this.shadowRoot.querySelector("#show-sidebar-btn").addEventListener("click", () => {
 			this.dispatchEvent(new CustomEvent("sidebaropen"));
 		});

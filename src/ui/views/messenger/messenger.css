@@ -30,6 +30,7 @@
 	flex-direction: row;
 	align-items: center;
 	overflow: hidden;
+	margin-right: 15px;
 }
 
 .contact-info .text
@@ -60,7 +61,6 @@
 .contact-info .name-container
 {
 	overflow: hidden;
-	max-width: 200px;
 	white-space: nowrap;
 	text-overflow: ellipsis;
 }
@@ -118,8 +118,8 @@
 		display: none;
 	}
 
-	.contact-info .contact-info-info
+	.contact-info
 	{
-		max-width: 150px;
+		margin-right: 10px;
 	}
 }

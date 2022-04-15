@@ -9,17 +9,32 @@
 	overflow-y: auto;
 }
 
-.contacts-header
+.friends-header
 {
 	display: flex;
 	flex-direction: row;
+	justify-content: space-between;
 	align-items: center;
 	gap: 10px;
+	padding-left: 10px;
+	padding-right: 10px;
+	margin-bottom: 7px;
+}
+
+.friends-header .add-friend-btn
+{
+	padding: 5px 7px;
+	background: rgba(255, 255, 255, 0.05);
+}
+
+.friends-header .add-friend-btn:hover
+{
+	background: var(--secondary);
 }
 
 .contacts .title
 {
-	padding-left: 10px;
+	margin: 0;
 }
 
 .search
@@ -30,7 +45,7 @@
 	justify-content: center;
 	align-items: center;
 	padding: 0 5px;
-	width: 120px;
+	margin-bottom: 15px;
 }
 
 .search .search-icon
@@ -125,46 +140,5 @@
 	.search .search-icon
 	{
 		left: 10px;
-	}
-
-	.contacts-header
-	{
-		flex-direction: column;
-	}
-}
-
-@media(max-width: 990px)
-{
-	.contacts-header
-	{
-		flex-direction: column;
-		align-items: flex-start;
-		gap: 0;
-	}
-
-	.search
-	{
-		width: 100%;
-	}
-
-	.contacts .title
-	{
-		margin-bottom: 5px;
-	}
-}
-
-@media(min-width: 1350px)
-{
-	.search
-	{
-		width: 200px;
-	}
-}
-
-@media(min-width: 1550px)
-{
-	.search
-	{
-		width: auto;
 	}
 }

@@ -6,7 +6,7 @@ class AddContactModalComponent extends ModalComponent
 {
 	constructor()
 	{
-		super("Add Contact", htmlTemplate, style);
+		super("Add Friend", htmlTemplate, style);
 
 		this.defaultMessage = "Hi, my name is ___. Please accept my friend request.";
 
