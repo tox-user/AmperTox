@@ -16,7 +16,7 @@ This client is currently in alpha stage. Please **backup your Tox profiles** bef
 **Note:** there are some huge performance issues with file transfers caused by using toxcore with ffi-napi. This causes very slow transfer speeds and increased CPU usage (only during file transfers).
 
 ## Prerequisites
-- [toxcore](https://github.com/TokTok/c-toxcore)
+- [toxcore 2.16 or higher](https://github.com/TokTok/c-toxcore)
 - [Node.js 14.x](https://nodejs.org)
 - [Python](https://python.org)
 
