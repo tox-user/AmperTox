@@ -1,21 +1,31 @@
 const ref = require("ref-napi");
 const ffi = require("ffi-napi");
-const types = require("./types");
 const libtoxcore = require("./libtoxcore");
-const fs = require("fs");
-const path = require("path");
-const FileControl = require("../models/tox/fileControl");
-const FileKind = require("../models/tox/fileKind");
-const eventDefinition = require("./eventDefinition");
+import types, { RefBuffer, EventListeners } from "./types";
+import fs from "fs";
+import path from "path";
+import ToxFileControl from "../models/tox/fileControl";
+import ToxFileKind from "../models/tox/fileKind";
+import { eventDefinition } from "./eventDefinition";
+import ToxOptions from "../models/tox/options";
 
 class Tox
 {
+	error: RefBuffer;
+	bootstrapError: RefBuffer;
+	options: typeof ToxOptions;
+	tox: Buffer;
+	eventListeners: EventListeners;
+	address: string;
+	username: string;
+	publicKey: string;
+	statusMessage: string;
+	contacts: Uint32Array;
+
 	/**
 	 * Creates new Tox instance
-	 * @typedef {import('../models/tox/options')} ToxOptions
-	 * @param {ToxOptions} options
 	 */
-	constructor(options=null)
+	constructor(options: typeof ToxOptions = null)
 	{
 		this.error = ref.alloc("int");
 		this.bootstrapError = ref.alloc("int");
@@ -44,19 +54,16 @@ class Tox
 	 */
 	eventsIterate()
 	{
-		const eventsPtr = libtoxcore.tox_events_iterate(this.tox, false, null);
+		const eventsPtr: Buffer = libtoxcore.tox_events_iterate(this.tox, false, null);
 		const subscribedEventNames = Object.keys(eventDefinition).filter((eventName) => Object.keys(this.eventListeners).includes(eventName));
 
 		subscribedEventNames.forEach((eventName) =>
 		{
-			const amount = eventDefinition[eventName].getAmount(eventsPtr); // amount of events
-			if (amount => 0)
+			const numEvents = eventDefinition[eventName].getAmount(eventsPtr); // amount of events of this type
+			for (let i = 0; i < numEvents; i++)
 			{
-				for (let i = 0; i < amount; i++)
-				{
-					const dataBuffer = eventDefinition[eventName].getData(eventsPtr, i); // get event data
-					this.eventListeners[eventName](dataBuffer); // call the callback
-				}
+				const dataBuffer = eventDefinition[eventName].getData(eventsPtr, i); // get event data
+				this.eventListeners[eventName](dataBuffer); // call the callback
 			}
 		});
 
@@ -74,10 +81,8 @@ class Tox
 
 	/**
 	 * Adds a listener for a given Tox event
-	 * @param {string} eventName
-	 * @param {(data: any) => void} callback
 	 */
-	addEventListener(eventName, callback)
+	addEventListener(eventName: string, callback: (data: Buffer) => void)
 	{
 		this.eventListeners[eventName] = callback;
 	}
@@ -87,9 +92,9 @@ class Tox
 	 * @param {string} ipAddress bootstrap node's ip address
 	 * @param {number} port bootstrap node's port
 	 * @param {string} publicKey bootstrap node's public key
-	 * @returns {boolean}
+	 * @returns {boolean} true on success
 	 */
-	connect(ipAddress, port, publicKey)
+	connect(ipAddress: string, port: number, publicKey: string): boolean
 	{
 		const buffer = Buffer.from(publicKey, "hex");
 		const view = new Uint8Array(buffer);
@@ -100,7 +105,7 @@ class Tox
 	 * Gets this Tox instance's Tox ID
 	 * @returns {string} Tox ID
 	 */
-	getAddress()
+	getAddress(): string
 	{
 		const size = libtoxcore.tox_address_size();
 		const buffer = new ArrayBuffer(size);
@@ -113,7 +118,7 @@ class Tox
 	 * Gets this Tox instance's public key
 	 * @returns {string} public key
 	 */
-	getPublicKey()
+	getPublicKey(): string
 	{
 		const size = libtoxcore.tox_public_key_size();
 		const buffer = new ArrayBuffer(size);
@@ -126,7 +131,7 @@ class Tox
 	 * Gets this Tox instance's username
 	 * @returns {string} username
 	 */
-	getUsername()
+	getUsername(): string
 	{
 		const size = libtoxcore.tox_self_get_name_size(this.tox);
 		const buffer = new ArrayBuffer(size);
@@ -139,7 +144,7 @@ class Tox
 	 * Sets new username for this Tox instance
 	 * @param {string} name
 	 */
-	setUsername(name)
+	setUsername(name: string)
 	{
 		const errorPtr = ref.alloc("int");
 		let buffer = Buffer.from(name, "utf8");
@@ -151,7 +156,7 @@ class Tox
 	 * Sets new status message for this Tox instance
 	 * @param {string} statusMessage
 	 */
-	setStatusMessage(statusMessage)
+	setStatusMessage(statusMessage: string)
 	{
 		const errorPtr = ref.alloc("int");
 		let buffer = Buffer.from(statusMessage, "utf8");
@@ -163,7 +168,7 @@ class Tox
 	 * Gets this Tox instance's status message
 	 * @returns {string} status message
 	 */
-	getStatusMessage()
+	getStatusMessage(): string
 	{
 		const size = libtoxcore.tox_self_get_status_message_size(this.tox);
 		const buffer = new ArrayBuffer(size);
@@ -176,7 +181,7 @@ class Tox
 	 * Gets this Tox instance's status
 	 * @returns {number} status - one of the values defined in TOX_USER_STATUS
 	 */
-	getStatus()
+	getStatus(): number
 	{
 		return libtoxcore.tox_self_get_status(this.tox);
 	}
@@ -187,7 +192,7 @@ class Tox
 	 * @param {string} profileName
 	 * @returns {string} unique profile name
 	 */
-	uniqueProfileName(savePath, profileName)
+	uniqueProfileName(savePath: string, profileName: string): string
 	{
 		let uniqueName = profileName;
 		let i = 2;
@@ -206,7 +211,7 @@ class Tox
 	 * @param {string} profileSavePath path to save the profile in - it must contain a file name without the file extension
 	 * @returns {Promise}
 	 */
-	save(profileSavePath)
+	save(profileSavePath: string): Promise<void>
 	{
 		return new Promise((resolve) =>
 		{
@@ -232,7 +237,7 @@ class Tox
 	 * @param {string} profileName path with a file name but witout the file extension
 	 * @returns {Promise<Uint8Array>}
 	 */
-	static load(profileName)
+	static load(profileName: string): Promise<Uint8Array>
 	{
 		return new Promise((resolve) =>
 		{
@@ -252,9 +257,8 @@ class Tox
 
 	/**
 	 * This Tox instance has connected / disconnected
-	 * @param {(tox: any, status: number, userData: any) => void} callback
 	 */
-	onConnectionStatusChange(callback)
+	onConnectionStatusChange(callback: (tox: any, status: number, userData: any) => void)
 	{
 		const cb = ffi.Callback('void', [types.toxPtr, 'int', types.userDataPtr], callback);
 		libtoxcore.tox_callback_self_connection_status(this.tox, cb);
@@ -266,12 +270,11 @@ class Tox
 
 	/**
 	 * This Tox instance has received a friend request
-	 * @param {(tox: any, publicKey: string, message: string, length: number, userData: any) => void} callback
 	 */
-	onFriendRequest(callback)
+	onFriendRequest(callback: (tox: any, publicKey: string, message: string, length: number, userData: any) => void)
 	{
 		const cb = ffi.Callback('void', [types.toxPtr, "pointer", "string", "size_t", types.userDataPtr],
-		(tox, publicKey, message, length, userData) =>
+		(tox: any, publicKey: any, message: any, length: any, userData: any) =>
 		{
 			let publicKeyString = ref.reinterpret(publicKey, 32, 0).toString("hex");
 			callback(tox, publicKeyString, message, length, userData);
@@ -286,9 +289,8 @@ class Tox
 
 	/**
 	 * Contact has connected / disconnected
-	 * @param {(tox: any, contactId: number, status: number, userData: any) => void} callback
 	 */
-	onFriendStatusChange(callback)
+	onFriendStatusChange(callback: (tox: any, contactId: number, status: number, userData: any) => void)
 	{
 		const cb = ffi.Callback('void', [types.toxPtr, 'int', "int", types.userDataPtr], callback);
 		libtoxcore.tox_callback_friend_status(this.tox, cb);
@@ -300,9 +302,8 @@ class Tox
 
 	/**
 	 * Contact has changed their status message
-	 * @param {(tox: any, id: number, message: string, length: number, userData: any) => void} callback
 	 */
-	onFriendStatusMessageChange(callback)
+	onFriendStatusMessageChange(callback: (tox: any, id: number, message: string, length: number, userData: any) => void)
 	{
 		const cb = ffi.Callback('void', [types.toxPtr, 'int', "string", "size_t", types.userDataPtr], callback);
 		libtoxcore.tox_callback_friend_status_message(this.tox, cb);
@@ -314,9 +315,8 @@ class Tox
 
 	/**
 	 * Contact has changed their username
-	 * @param {(tox: any, id: number, name: string, length: number, userData: any) => void} callback
 	 */
-	onFriendNameChange(callback)
+	onFriendNameChange(callback: (tox: any, id: number, name: string, length: number, userData: any) => void)
 	{
 		const cb = ffi.Callback('void', [types.toxPtr, 'int', "string", "size_t", types.userDataPtr], callback);
 		libtoxcore.tox_callback_friend_name(this.tox, cb);
@@ -328,9 +328,8 @@ class Tox
 
 	/**
 	 * Contact has connected / disconnected
-	 * @param {(tox: any, id: number, connectionStatus: number, userData: any) => void} callback
 	 */
-	onFriendConnectionStatusChange(callback)
+	onFriendConnectionStatusChange(callback: (tox: any, id: number, connectionStatus: number, userData: any) => void)
 	{
 		const cb = ffi.Callback('void', [types.toxPtr, 'int', "int", types.userDataPtr], callback);
 		libtoxcore.tox_callback_friend_connection_status(this.tox, cb);
@@ -342,9 +341,8 @@ class Tox
 
 	/**
 	 * Received file transfer request from friend
-	 * @param {(friendId: number, fileId: number, size: number, name: string, isAvatar: boolean) => void} callback
 	 */
-	onFileReceive(callback)
+	onFileReceive(callback: (friendId: number, fileId: number, size: number, name: string, isAvatar: boolean) => void)
 	{
 		this.addEventListener("fileRecv", (dataPtr) => {
 			const fileNameBuffer = libtoxcore.tox_event_file_recv_get_filename(dataPtr);
@@ -354,17 +352,16 @@ class Tox
 			const fileSize = libtoxcore.tox_event_file_recv_get_file_size(dataPtr);
 			const friendId = libtoxcore.tox_event_file_recv_get_friend_number(dataPtr);
 			const fileKind = libtoxcore.tox_event_file_recv_get_kind(dataPtr);
-			const isAvatar = fileKind == FileKind.TOX_FILE_KIND_AVATAR.value;
+			const isAvatar = fileKind == ToxFileKind.TOX_FILE_KIND_AVATAR;
 
 			callback(friendId, fileId, fileSize, fileName, isAvatar);
 		});
 	}
 
 	/**
-	 * Received a file chunk from friend
-	 * @param {(friendId: number, fileId: number, position: number, data: Buffer, length: number) => void} callback
+	 * Received a file chunk from friend. On final chunk length is 0 and data is null
 	 */
-	onFileReceiveChunk(callback)
+	onFileReceiveChunk(callback: (friendId: number, fileId: number, position: number, data: Buffer, length: number) => void)
 	{
 		this.addEventListener("fileRecvChunk", (dataPtr) => {
 			const chunkDataPtr = libtoxcore.tox_event_file_recv_chunk_get_data(dataPtr);
@@ -372,10 +369,7 @@ class Tox
 			const fileId = libtoxcore.tox_event_file_recv_chunk_get_file_number(dataPtr);
 			const friendId = libtoxcore.tox_event_file_recv_chunk_get_friend_number(dataPtr);
 			const position = libtoxcore.tox_event_file_recv_chunk_get_position(dataPtr);
-			let fileDataPtr;
-
-			if (chunkLength > 0) // on final chunk length is 0 and data is null
-				fileDataPtr = Buffer.from(ref.reinterpret(chunkDataPtr, chunkLength));
+			const fileDataPtr = Buffer.from(ref.reinterpret(chunkDataPtr, chunkLength));
 
 			callback(friendId, fileId, position, fileDataPtr, chunkLength);
 		});
@@ -383,9 +377,8 @@ class Tox
 
 	/**
 	 * Received a file control message from friend
-	 * @param {(friendId: number, fileId: number, messageType: number) => void} callback
 	 */
-	onFileReceiveControlMsg(callback)
+	onFileReceiveControlMsg(callback: (friendId: number, fileId: number, messageType: number) => void)
 	{
 		this.addEventListener("fileRecvControl", (dataPtr) => {
 			const friendId = libtoxcore.tox_event_file_recv_control_get_friend_number(dataPtr);
@@ -398,9 +391,8 @@ class Tox
 
 	/**
 	 * Received a file chunk request from friend
-	 * @param {(friendId: number, fileId: number, position: number, size: number) => void} callback
 	 */
-	onFileReceiveChunkRequest(callback)
+	onFileReceiveChunkRequest(callback: (friendId: number, fileId: number, position: number, size: number) => void)
 	{
 		this.addEventListener("fileChunkRequest", (dataPtr) => {
 			const friendId = libtoxcore.tox_event_file_chunk_request_get_friend_number(dataPtr);
@@ -414,9 +406,8 @@ class Tox
 
 	/**
 	 * Received a message from a contact
-	 * @param {(tox: any, contactId: number, messageType: number, message: string, length: number, userData: any) => void} callback
 	 */
-	onMessageReceive(callback)
+	onMessageReceive(callback: (tox: any, contactId: number, messageType: number, message: string, length: number, userData: any) => void)
 	{
 		const cb = ffi.Callback('void', [types.toxPtr, "int", "int", "string", "size_t", types.userDataPtr], callback);
 		libtoxcore.tox_callback_friend_message(this.tox, cb);
@@ -427,46 +418,36 @@ class Tox
 	}
 
 	/**
-	 * Sends a file transfer control message to contact - used to accept / pause / reject file transfers
-	 * @param {number} contactId
-	 * @param {number} fileId
-	 * @param {number} type
-	 * @returns {boolean}
+	 * Sends a file transfer control message to friend - used to accept / pause / reject file transfers
 	 */
-	sendFileControlMsg(contactId, fileId, type)
+	sendFileControlMsg(friendId: number, fileId: number, type: number): boolean
 	{
-		console.log("Sending control", contactId, fileId, FileControl.enums[type].key);
+		console.log("Sending control", friendId, fileId, ToxFileControl[type]);
 		const error = ref.alloc("int");
-		return libtoxcore.tox_file_control(this.tox, contactId, fileId, type, error);
+		return libtoxcore.tox_file_control(this.tox, friendId, fileId, type, error);
 	}
 
 	/**
-	 * Accept file transfer from contact
-	 * @param {number} contactId
-	 * @param {number} fileId
+	 * Accept file transfer from friend
 	 */
-	acceptFileTransfer(contactId, fileId)
+	acceptFileTransfer(friendId: number, fileId: number)
 	{
-		const type = FileControl.TOX_FILE_CONTROL_RESUME.value;
-		this.sendFileControlMsg(contactId, fileId, type);
+		this.sendFileControlMsg(friendId, fileId, ToxFileControl.TOX_FILE_CONTROL_RESUME);
 	}
 
 	/**
-	 * Reject file transfer from contact
-	 * @param {number} contactId
-	 * @param {number} fileId
+	 * Reject file transfer from friend
 	 */
-	rejectFileTransfer(contactId, fileId)
+	rejectFileTransfer(friendId: number, fileId: number)
 	{
-		const type = FileControl.TOX_FILE_CONTROL_CANCEL.value;
-		this.sendFileControlMsg(contactId, fileId, type);
+		this.sendFileControlMsg(friendId, fileId, ToxFileControl.TOX_FILE_CONTROL_CANCEL);
 	}
 
 	/**
 	 * Gets contacts of this Tox instance
 	 * @returns {Uint32Array} contacts
 	 */
-	getContacts()
+	getContacts(): Uint32Array
 	{
 		const size = libtoxcore.tox_self_get_friend_list_size(this.tox);
 		const buffer = new ArrayBuffer(size * 4);
@@ -478,9 +459,9 @@ class Tox
 	/**
 	 * Accept a friend request
 	 * @param {string} publicKey
-	 * @returns {number} contactId
+	 * @returns {number} friendId
 	 */
-	acceptFriendRequest(publicKey)
+	acceptFriendRequest(publicKey: string): number
 	{
 		const buffer = Buffer.from(publicKey, "hex");
 		const view = new Uint8Array(buffer);
@@ -490,10 +471,10 @@ class Tox
 
 	/**
 	 * Gets contact's username
-	 * @param {number} id contact id
+	 * @param {number} id friend id
 	 * @returns {string} username
 	 */
-	getContactName(id)
+	getContactName(id: number): string
 	{
 		let sizeErr = ref.alloc("int");
 		let nameErr = ref.alloc("int");
@@ -509,7 +490,7 @@ class Tox
 	 * @param {number} id contact id
 	 * @returns {string} status message
 	 */
-	getContactStatusMessage(id)
+	getContactStatusMessage(id: number): string
 	{
 		let sizeErr = ref.alloc("int");
 		let nameErr = ref.alloc("int");
@@ -521,11 +502,11 @@ class Tox
 	}
 
 	/**
-	 * Gets contact's public key
-	 * @param {number} id contact id
-	 * @returns {string} contact's public key
+	 * Gets friend's public key
+	 * @param {number} id friend id
+	 * @returns {string} friend's public key
 	 */
-	getContactPublicKey(id)
+	getContactPublicKey(id: number): string
 	{
 		let err = ref.alloc("int");
 		const buffer = new ArrayBuffer(32);
@@ -535,24 +516,21 @@ class Tox
 	}
 
 	/**
-	 * Send a message to contact
-	 * @param {number} contactId
-	 * @param {string} message
+	 * Send a message to friend
 	 */
-	sendMessage(contactId, message)
+	sendMessage(friendId: number, message: string)
 	{
 		const messageType = 0; // normal message
 		const errorPtr = ref.alloc("int");
 		const buffer = Buffer.from(message, "utf8");
-		libtoxcore.tox_friend_send_message(this.tox, contactId, messageType, buffer, buffer.length, errorPtr);
+		libtoxcore.tox_friend_send_message(this.tox, friendId, messageType, buffer, buffer.length, errorPtr);
 	}
 
 	/**
 	 * Sends a friend request
-	 * @param {string} toxId
-	 * @returns {number} contactId
+	 * @returns {number} friendId
 	 */
-	sendFriendRequest(toxId, message)
+	sendFriendRequest(toxId: string, message: string): number
 	{
 		const buffer = Buffer.from(toxId, "hex");
 		const view = new Uint8Array(buffer);
@@ -564,60 +542,52 @@ class Tox
 
 	/**
 	 * Removes contact from friend list
-	 * @param {number} contactId
+	 * @param {number} friendId
 	 * @returns {boolean} true on success
 	 */
-	removeContact(contactId)
+	removeContact(friendId: number): boolean
 	{
 		const err = ref.alloc("int");
-		return libtoxcore.tox_friend_delete(this.tox, contactId, err);
+		return libtoxcore.tox_friend_delete(this.tox, friendId, err);
 	}
 
 	/**
-	 *
-	 * @param {number} contactId
-	 * @param {boolean} isAvatar
-	 * @param {string} fileName
-	 * @param {number} fileSize
-	 * @param {number} fileId
+	 * Send file to friend
 	 * @returns {number} A file number used as an identifier in subsequent callbacks. This
 	 * 	number is per friend. File numbers are reused after a transfer terminates.
 	 * 	On failure, this function returns an unspecified value. Any pattern in file numbers
 	 * 	should not be relied on.
 	 */
-	sendFile(contactId, isAvatar, fileName, fileSize, fileId=null)
+	sendFile(friendId: number, isAvatar: boolean, fileName: string, fileSize: number, fileId: number | null = null): number
 	{
 		const err = ref.alloc("int");
-		let fileKind = FileKind.TOX_FILE_KIND_DATA;
+		let fileKind = ToxFileKind.TOX_FILE_KIND_DATA;
 		if (isAvatar)
-			fileKind = FileKind.TOX_FILE_KIND_AVATAR;
+			fileKind = ToxFileKind.TOX_FILE_KIND_AVATAR;
 		const fileNameBuffer = Buffer.from(fileName, "utf8");
 
-		return libtoxcore.tox_file_send(this.tox, contactId, fileKind, fileSize, fileId, fileNameBuffer, fileNameBuffer.length, err);
+		return libtoxcore.tox_file_send(this.tox, friendId, fileKind, fileSize, fileId, fileNameBuffer, fileNameBuffer.length, err);
 	}
 
 	/**
-	 *
-	 * @param {number} contactId
-	 * @param {number} fileId
-	 * @param {number} position
-	 * @param {Buffer} data
+	 * Send file chunk to friend
 	 * @returns {boolean} true on success
 	 */
-	sendFileChunk(contactId, fileId, position, data=null)
+	sendFileChunk(friendId: number, fileId: number, position: number, data: Buffer | null = null): boolean
 	{
 		const err = ref.alloc("int");
 		let length = 0;
 		if (data != null)
 			length = data.length;
-		return libtoxcore.tox_file_send_chunk(this.tox, contactId, fileId, position, data, length, err);
+
+		return libtoxcore.tox_file_send_chunk(this.tox, friendId, fileId, position, data, length, err);
 	}
 
 	// TODO: add tox hash function to use it on avatars
-	tox_hash(data)
+	tox_hash(data: any)
 	{
 
 	}
 }
 
-module.exports = Tox;
+export default Tox;

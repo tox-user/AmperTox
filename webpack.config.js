@@ -11,7 +11,7 @@ module.exports =
 		path: path.resolve(__dirname, "dist"),
 		filename: "main.js"
 	},
-	devtool: "inline-source-map",
+	devtool: process.env.NODE_ENV == "production" ? "source-map" : "inline-source-map",
 	module:
 	{
 		rules:
@@ -41,6 +41,11 @@ module.exports =
 					}
 				}
 			},
+			{
+				test: /\.ts$/,
+				use: 'ts-loader',
+				exclude: /node_modules/,
+			}
 		]
 	},
 	plugins:

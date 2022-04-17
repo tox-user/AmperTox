@@ -1,14 +1,13 @@
-const sqlite3 = require("sqlite3").verbose();
-let db;
+import sqlite3 from "sqlite3";
+let db: sqlite3.Database;
 
-module.exports =
+class Storage
 {
 	/**
 	 * Opens the database asynchronously
 	 * @param {string} databasePath path to database file
-	 * @returns {Promise}
 	 */
-	open: async (databasePath) =>
+	static async open(databasePath: string): Promise<void>
 	{
 		return new Promise((resolve, reject) =>
 		{
@@ -24,13 +23,12 @@ module.exports =
 				resolve();
 			});
 		});
-	},
+	}
 
 	/**
 	 * Closes the database asynchronously
-	 * @returns {Promise}
 	 */
-	close: async () =>
+	static async close(): Promise<void>
 	{
 		return new Promise((resolve, reject) =>
 		{
@@ -46,13 +44,12 @@ module.exports =
 				resolve();
 			});
 		});
-	},
+	}
 
 	/**
 	 * Sets up the database for a new profile
-	 * @returns {Promise}
 	 */
-	createTables: async () =>
+	static async createTables(): Promise<void>
 	{
 		return new Promise((resolve, reject) =>
 		{
@@ -76,7 +73,7 @@ module.exports =
 				resolve();
 			});
 		});
-	},
+	}
 
 	/**
 	 * Saves a message to the database
@@ -86,7 +83,7 @@ module.exports =
 	 * @param {number} timestamp date of when the message was sent
 	 * @returns {Promise} promise that returns message id
 	 */
-	addMessage: async (contactPk, message, ownerPk, timestamp) =>
+	static async addMessage(contactPk: string, message: string, ownerPk: string, timestamp: number): Promise<number>
 	{
 		return new Promise((resolve, reject) =>
 		{
@@ -100,10 +97,11 @@ module.exports =
 					reject(err);
 				}
 
+				// @ts-ignore
 				resolve(this.lastID);
 			});
 		});
-	},
+	}
 
 	/**
 	 * Asynchronously loads messages for a specified contact
@@ -111,7 +109,7 @@ module.exports =
 	 * @param {number} amount amount of messages to load
 	 * @returns {Promise} promise that returns loaded messages
 	 */
-	getMessages: async (contactPk, amount=20) =>
+	static async getMessages(contactPk: string, amount: number = 20): Promise<any[]>
 	{
 		return new Promise((resolve, reject) =>
 		{
@@ -132,3 +130,5 @@ module.exports =
 		});
 	}
 };
+
+export default Storage;

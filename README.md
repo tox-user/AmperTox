@@ -13,7 +13,7 @@ Current features:
 ## Warning
 This client is currently in alpha stage. Please **backup your Tox profiles** before using it.
 
-**Note:** there are some huge performance issues with file transfers caused by using toxcore with ffi-napi. This causes very slow transfer speeds and increased CPU usage (only during file transfers).
+**Note:** there are some performance issues with file transfers caused by using toxcore with ffi-napi. This causes slow transfer speeds and increased CPU usage (only during file transfers).
 
 ## Prerequisites
 - [toxcore 2.16 or higher](https://github.com/TokTok/c-toxcore)
@@ -25,7 +25,7 @@ This client is currently in alpha stage. Please **backup your Tox profiles** bef
 npm install
 npm run build
 ```
-For development you can instead run `npm run watch`. It will rebuild the UI on changes, but you will still need to restart the app to see them.
+For development you can instead run `npm run watch`. It will rebuild automatically on changes, but you will still need to restart the app to see them.
 
 To make a release build run `npm run build-release`. It will create executables for your platform in `build` directory.
 

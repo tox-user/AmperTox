@@ -1,6 +1,16 @@
 const libtoxcore = require("./libtoxcore");
 
-module.exports =
+interface ToxEvent
+{
+	getAmount: (ToxEvents: Buffer) => number;
+	getData: (ToxEvents: Buffer, index: number) => Buffer;
+}
+
+interface ToxEventDefinition {
+	[key: string]: ToxEvent;
+}
+
+export const eventDefinition: ToxEventDefinition =
 {
 	conferenceConnected: {
 		getAmount: libtoxcore.tox_events_get_conference_connected_size,

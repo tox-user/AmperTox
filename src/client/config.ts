@@ -1,18 +1,39 @@
-const fs = require("fs");
-const path = require("path");
-const merge = require("lodash.merge");
-const USER_CONFIG_PATH = path.resolve(__dirname, "../../config.json");
+import fs from "fs";
+import path from "path";
+// @ts-ignore
+import merge from "lodash.merge";
+import "./defaultConfig.json";
+
 const DEFAULT_CONFIG_PATH = path.resolve(__dirname, "defaultConfig.json");
+const USER_CONFIG_PATH = path.resolve(__dirname, "../../config.json");
 const ENCODING = "utf8";
 const INDENT_LEVEL = 4;
 
-module.exports =
+export interface ConfigData
+{
+	lastUsedProfile: string;
+    network: {
+        udp: boolean;
+        ipv6: boolean;
+		proxy: {
+			enabled: boolean;
+			type: "socks5" | "http";
+			address: string;
+			port: number;
+		};
+    };
+	fileTransfers: {
+		rejectFiles: boolean;
+		rejectAvatars: boolean;
+	};
+}
+
+export class Config
 {
 	/**
 	 * Loads client config synchronously
-	 * @returns {any} loaded config data
 	 */
-	load()
+	static load(): ConfigData
 	{
 		// we use sync because we load config only on client start and we need it before everything else
 		if (!fs.existsSync(USER_CONFIG_PATH))
@@ -23,13 +44,13 @@ module.exports =
 
 		const defaultConfigJson = fs.readFileSync(DEFAULT_CONFIG_PATH, ENCODING);
 		const userConfigJson = fs.readFileSync(USER_CONFIG_PATH, ENCODING);
-		const defaultConfig = JSON.parse(defaultConfigJson);
+		const defaultConfig: ConfigData = JSON.parse(defaultConfigJson);
 
 		// parse user config
-		let config;
+		let config: ConfigData;
 		try
 		{
-			const userConfig = JSON.parse(userConfigJson);
+			const userConfig: ConfigData = JSON.parse(userConfigJson);
 			config = merge(defaultConfig, userConfig);
 
 		} catch(err)
@@ -40,14 +61,12 @@ module.exports =
 
 		console.log("Loaded config");
 		return config;
-	},
+	}
 
 	/**
 	 * Saves client config asynchronously
-	 * @param {any} data config data
-	 * @returns Promise
 	 */
-	save(data)
+	static save (data: Config): Promise<void>
 	{
 		return new Promise((resolve) =>
 		{

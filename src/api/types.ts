@@ -1,7 +1,7 @@
 const ref = require("ref-napi");
-const ToxOptions = require("../models/tox/options");
+import ToxOptions from "../models/tox/options";
 
-module.exports =
+const types =
 {
 	toxPtr: ref.refType(ref.types.void),
 	userDataPtr: ref.refType(ref.types.void),
@@ -10,3 +10,16 @@ module.exports =
 	toxOptionsPtr: ref.refType(ToxOptions),
 	toxEventsPtr: ref.refType(ref.types.void)
 };
+
+export interface RefBuffer extends Buffer
+{
+	deref: () => any;
+}
+
+export interface EventListeners
+{
+	[key: string]: (data: Buffer) => void;
+}
+
+module.exports = types;
+export default types;

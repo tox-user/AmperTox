@@ -1,7 +1,7 @@
-const { app, BrowserWindow, ipcMain, shell } = require("electron");
-const Client = require("./src/client/client");
-const path = require("path");
-const URL = require("url").URL;
+import { app, BrowserWindow, ipcMain, shell } from "electron";
+import Client from "./client/client";
+import path from "path";
+import { URL } from "url";
 require('events').EventEmitter.defaultMaxListeners = 15;
 let profileName = "";
 
@@ -27,7 +27,7 @@ function createWindow()
 	const win = new BrowserWindow({
 		width: 1200,
 		height: 768,
-		icon: path.resolve(__dirname, "assets/icon/128.png"),
+		icon: path.resolve(__dirname, "../assets/icon/128.png"),
 		autoHideMenuBar: true,
 		backgroundColor: "rgb(26, 24, 23)",
 		titleBarStyle: useCustomTitleBar ? "hidden" : "default",
@@ -53,7 +53,7 @@ function createWindow()
 	{
 		// load the UI
 		win.loadFile("./dist/index.html");
-	}).catch((err) =>
+	}).catch((err: any) =>
 	{
 		console.error("Couldn't load the UI", err.message);
 	});
@@ -61,15 +61,15 @@ function createWindow()
 	const client = new Client(profileName, win);
 	client.onReady(() =>
 	{
-		ipcMain.on("data-request", (event) => client.sendDataToRenderer(event, client));
-		ipcMain.on("accept-friend-request", (event, arg) => client.acceptFriendRequest(event, arg, client));
-		ipcMain.on("decline-friend-request", (event, arg) => client.declineFriendRequest(event, arg, client));
-		ipcMain.on("send-message", (event, arg) => client.sendMessage(event, arg, client));
+		ipcMain.on("data-request", () => client.sendDataToRenderer(client));
+		ipcMain.on("accept-friend-request", (event, arg) => client.acceptFriendRequest(arg, client));
+		ipcMain.on("decline-friend-request", (event, arg) => client.declineFriendRequest(arg, client));
+		ipcMain.on("send-message", (event, arg) => client.sendMessage(arg, client));
 		ipcMain.on("send-file", (event, arg) => client.sendFile(arg.contactId, arg.filePath, arg.fileName, arg.fileSize, false, client));
-		ipcMain.on("messages-request", (event, arg) => client.loadMessages(event, arg, undefined, client));
-		ipcMain.on("load-more-messages", (event, arg) => client.loadMessages(event, arg.contactId, arg.amount, client));
-		ipcMain.on("send-friend-request", (event, arg) => client.sendFriendRequest(event, arg.toxId, arg.message, client));
-		ipcMain.on("remove-contact", (event, arg) => client.removeContact(event, arg.contactId, client));
+		ipcMain.on("messages-request", (event, arg) => client.loadMessages(arg, undefined, client));
+		ipcMain.on("load-more-messages", (event, arg) => client.loadMessages(arg.contactId, arg.amount, client));
+		ipcMain.on("send-friend-request", (event, arg) => client.sendFriendRequest(arg.toxId, arg.message, client));
+		ipcMain.on("remove-contact", (event, arg) => client.removeContact(arg.contactId, client));
 		process.on("SIGINT", () => client.exit(client));
 		app.on("window-all-closed", () => client.exit(client));
 
@@ -96,7 +96,7 @@ app.on("web-contents-created", (event, contents) =>
 	// forbid creation of additional windows
 	contents.setWindowOpenHandler(() =>
 	{
-		return {action: "deny"};
+		return { action: "deny" };
 	});
 });
 

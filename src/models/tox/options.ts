@@ -1,7 +1,7 @@
 const ref = require("ref-napi");
 const Struct = require("ref-struct-di")(ref);
 
-module.exports = Struct({
+export default Struct({
 	ipv6_enabled: "bool",
 	udp_enabled: "bool",
 	local_discovery_enabled: "bool",

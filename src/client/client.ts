@@ -1,21 +1,20 @@
-const { app, Notification } = require("electron");
-const Tox = require("../api/tox");
-const ToxErrNew = require("../models/tox/errNew");
-const ToxConnection = require("../models/tox/connection");
-const ToxUserStatus = require("../models/tox/userStatus");
-const ToxErrBootstrap = require("../models/tox/errBootstrap");
-const ToxOptions = require("../models/tox/options");
-const Config = require("./config");
-const Contact = require("../models/contact");
-const fs = require("fs");
-const FileControl = require("../models/tox/fileControl");
-const storage = require("./storage");
-const Message = require("../models/message");
-const path = require("path");
-const FileTransfer = require('../models/fileTransfer');
-const { findFileTransferIndex } = require('./fileTransfer');
-const url = require("url");
-const ProxyType = require("../models/tox/proxyType");
+import { app, Notification, BrowserWindow } from "electron";
+import Tox from "../api/tox";
+import ToxErrNew from "../models/tox/errNew";
+import ToxConnection from "../models/tox/connection";
+import ToxUserStatus from "../models/tox/userStatus";
+import ToxErrBootstrap from "../models/tox/errBootstrap";
+import ToxOptions from "../models/tox/options";
+import { Config, ConfigData } from "./config";
+import Friend from "../models/friend";
+import fs from "fs";
+import ToxFileControl from "../models/tox/fileControl";
+import Storage from "./storage";
+import Message from "../models/message";
+import path from "path";
+import FileTransfer from "../models/fileTransfer";
+import url from "url";
+import ToxProxyType from "../models/tox/proxyType";
 
 const DATA_DIR = path.resolve(app.getPath("appData"), "tox");
 const AVATARS_SAVE_DIR = path.resolve(DATA_DIR, "avatars");
@@ -26,15 +25,19 @@ const NOTIFICATION_ICON_PATH = "../../assets/icon/128.png";
 
 class Client
 {
-	/**
-	 * @param {string} profileName
-	 * @param {BrowserWindow} window
-	 */
-	constructor(profileName="", window)
+	profileName: string;
+	window: BrowserWindow;
+	prevConnection: number;
+	isConnected: boolean;
+	tox: Tox | null;
+	config: ConfigData;
+	fileTransfers: FileTransfer[];
+
+	constructor(profileName: string = "", window: BrowserWindow)
 	{
 		this.profileName = profileName;
 		this.window = window;
-		this.prevConnection = ToxConnection.TOX_CONNECTION_NONE.value;
+		this.prevConnection = ToxConnection.TOX_CONNECTION_NONE;
 		this.isConnected = false;
 		this.tox = null;
 		this.config = Config.load();
@@ -44,9 +47,8 @@ class Client
 	/**
 	 * Returns a promise that completes after specified amount of miliseconds
 	 * @param {number} ms amount of miliseconds to wait
-	 * @returns {Promise}
 	 */
-	static sleep(ms)
+	static sleep(ms: number): Promise<void>
 	{
 		return new Promise((resolve) =>
 		{
@@ -61,46 +63,44 @@ class Client
 	{
 		try
 		{
-			await Client.sleep(this.tox.getIterationInterval());
-			this.tox.eventsIterate();
+			await Client.sleep(this.tox?.getIterationInterval());
+			this.tox?.eventsIterate();
 			this.loop();
 
-		} catch (e)
+		} catch (err)
 		{
-			console.log(e);
+			console.log("Error in Tox loop:", err);
 		}
 	}
 
 	/**
 	 * Called when client is finished creating a Tox instance
-	 * @param {() => void} callback
 	 */
-	onReady(callback)
+	onReady(callback: () => void)
 	{
 		this.createTox().then(callback);
 	}
 
 	/**
 	 * Loads user's Tox profile and creates Tox instance
-	 * @returns {Promise}
 	 */
-	createTox()
+	createTox(): Promise<void>
 	{
 		return new Promise((resolve) =>
 		{
-			let proxyType = ProxyType.TOX_PROXY_TYPE_NONE.value;
+			let proxyType = ToxProxyType.TOX_PROXY_TYPE_NONE;
 			if (this.config.network.proxy.enabled)
 			{
 				switch (this.config.network.proxy.type)
 				{
 					case "socks5":
-						proxyType = ProxyType.TOX_PROXY_TYPE_SOCKS5.value;
+						proxyType = ToxProxyType.TOX_PROXY_TYPE_SOCKS5;
 						break;
 					case "http":
-						proxyType = ProxyType.TOX_PROXY_TYPE_HTTP.value;
+						proxyType = ToxProxyType.TOX_PROXY_TYPE_HTTP;
 						break;
 					default:
-						proxyType = ProxyType.TOX_PROXY_TYPE_NONE.value;
+						proxyType = ToxProxyType.TOX_PROXY_TYPE_NONE;
 						break;
 				}
 			}
@@ -132,7 +132,7 @@ class Client
 			} else
 			{
 				const profilePath = path.resolve(DATA_DIR, this.profileName);
-				Tox.load(profilePath).then((profileData) =>
+				Tox.load(profilePath).then((profileData: any) =>
 				{
 					console.log("Loaded profile");
 
@@ -152,84 +152,83 @@ class Client
 	 */
 	start()
 	{
-		let errorValue = this.tox.error.deref();
-		if (errorValue != ToxErrNew.TOX_ERR_NEW_OK.value)
-			throw new Error("Error creating Tox instance " + ToxErrNew.get(errorValue).key);
+		let errorValue = this.tox?.error.deref();
+		if (errorValue != ToxErrNew.TOX_ERR_NEW_OK)
+			throw new Error("Error creating Tox instance " + ToxErrNew[errorValue]);
 
-		console.log("ID:", this.tox.address);
+		console.log("ID:", this.tox?.address);
 
 		// setup callbacks
 		let self = this;
-		this.tox.onConnectionStatusChange((tox, connectionStatus, userData) =>
+		this.tox?.onConnectionStatusChange((tox, connectionStatus, userData) =>
 			this.connectionStatusChanged(connectionStatus)
 		);
-		this.tox.onFriendRequest((tox, publicKey, message, length, userData) =>
+		this.tox?.onFriendRequest((tox, publicKey, message, length, userData) =>
 			this.friendRequestReceived(tox, publicKey, message, length, userData, self)
 		);
-		this.tox.onFriendStatusChange((tox, id, status, userData) =>
+		this.tox?.onFriendStatusChange((tox, id, status, userData) =>
 			this.friendStatusChanged(tox, id, status, userData, self)
 		);
-		this.tox.onFriendStatusMessageChange((tox, id, message, length, userData) =>
+		this.tox?.onFriendStatusMessageChange((tox, id, message, length, userData) =>
 			this.friendStatusMessageChanged(tox, id, message, length, userData, self)
 		);
-		this.tox.onFriendNameChange((tox, id, name, length, userData) =>
+		this.tox?.onFriendNameChange((tox, id, name, length, userData) =>
 			this.friendNameChanged(tox, id, name, length, userData, self)
 		);
-		this.tox.onFriendConnectionStatusChange((tox, id, connectionStatus, userData) =>
+		this.tox?.onFriendConnectionStatusChange((tox, id, connectionStatus, userData) =>
 			this.friendConnectionStatusChanged(tox, id, connectionStatus, userData, self)
 		);
-		this.tox.onFileReceiveControlMsg((friendId, fileId, messageType) =>
+		this.tox?.onFileReceiveControlMsg((friendId, fileId, messageType) =>
 			this.fileReceivedControlMsg(friendId, fileId, messageType)
 		);
-		this.tox.onFileReceiveChunkRequest((friendId, fileId, position, size) =>
+		this.tox?.onFileReceiveChunkRequest((friendId, fileId, position, size) =>
 			this.fileReceivedChunkRequest(friendId, fileId, position, size)
 		);
-		this.tox.onMessageReceive((tox, contactId, messageType, message, length, userData) =>
+		this.tox?.onMessageReceive((tox, contactId, messageType, message, length, userData) =>
 			this.messageReceived(tox, contactId, messageType, message, length, userData, self)
 		);
-		this.tox.onFileReceive((friendId, fileId, fileSize, fileName, isAvatar) =>
+		this.tox?.onFileReceive((friendId, fileId, fileSize, fileName, isAvatar) =>
 			this.fileReceived(friendId, fileId, fileSize, fileName, isAvatar)
 		);
-		this.tox.onFileReceiveChunk((friendId, fileId, position, fileDataPtr, chunkLength) =>
+		this.tox?.onFileReceiveChunk((friendId, fileId, position, fileDataPtr, chunkLength) =>
 			this.fileReceivedChunk(friendId, fileId, position, fileDataPtr, chunkLength)
 		);
 
 		// connect to DHT
-		const isConnecting = this.tox.connect("85.172.30.117", 33445, "8E7D0B859922EF569298B4D261A8CCB5FEA14FB91ED412A7603A585A25698832");
-		console.log("Bootstrapping...", isConnecting, ToxErrBootstrap.get(this.tox.bootstrapError.deref()).key);
+		const isConnecting = this.tox?.connect("85.172.30.117", 33445, "8E7D0B859922EF569298B4D261A8CCB5FEA14FB91ED412A7603A585A25698832");
+		console.log("Bootstrapping...", isConnecting, ToxErrBootstrap[this.tox?.bootstrapError.deref()]);
 
 		// create a DB for user if it wasn't created yet
 		const dbPath = path.resolve(DATA_DIR, `${this.profileName}.db`);
-		storage.open(dbPath).then(() => storage.createTables());
+		Storage.open(dbPath).then(() => Storage.createTables());
 
 		this.loop();
 	}
 
 	/**
 	 * Closes the app
-	 * @param {Client} self
 	 */
-	async exit(self)
+	async exit(self: Client)
 	{
 		console.log("\nExiting...");
 		await Promise.all([
-			self.tox.save(path.resolve(DATA_DIR, self.profileName)),
+			self.tox?.save(path.resolve(DATA_DIR, self.profileName)),
 			Config.save(self.config),
-			storage.close()
+			Storage.close()
 		]);
 
 		app.quit();
 	}
 
-	// we have connected / disconnected
-	connectionStatusChanged(connectionStatus)
+	// our connection status has changed
+	connectionStatusChanged(connectionStatus: ToxConnection)
 	{
-		if (connectionStatus != ToxConnection.TOX_CONNECTION_NONE.value && this.prevConnection == ToxConnection.TOX_CONNECTION_NONE.value)
+		if (connectionStatus != ToxConnection.TOX_CONNECTION_NONE && this.prevConnection == ToxConnection.TOX_CONNECTION_NONE)
 		{
 			console.log("Connected to DHT");
 			this.isConnected = true;
 
-		} else if (connectionStatus == ToxConnection.TOX_CONNECTION_NONE.value && this.prevConnection != ToxConnection.TOX_CONNECTION_NONE.value)
+		} else if (connectionStatus == ToxConnection.TOX_CONNECTION_NONE && this.prevConnection != ToxConnection.TOX_CONNECTION_NONE)
 		{
 			console.log("Disconnected");
 			this.isConnected = false;
@@ -237,11 +236,11 @@ class Client
 
 		this.prevConnection = connectionStatus;
 
-		const status = this.tox.getStatus();
+		const status = this.tox?.getStatus();
 		this.window.webContents.send("status-change", {connectionStatus, status});
 	}
 
-	friendRequestReceived(tox, publicKey, message, length, userData, self)
+	friendRequestReceived(tox: any, publicKey: string, message: string, length: number, userData: string, self: Client)
 	{
 		console.log("Friend request from", publicKey);
 		self.window.webContents.send("friend-request", {publicKey: publicKey, message: message});
@@ -254,32 +253,32 @@ class Client
 		}
 	}
 
-	acceptFriendRequest(event, data, self)
+	acceptFriendRequest(data: any, self: Client)
 	{
-		const contactId = self.tox.acceptFriendRequest(data.publicKey);
-		self.window.webContents.send("add-contact", this.createContact(contactId));
+		const friendId = self.tox?.acceptFriendRequest(data.publicKey) ?? 0;
+		self.window.webContents.send("add-contact", this.createContact(friendId));
 		self.window.webContents.send("remove-friend-request");
 	}
 
-	declineFriendRequest(event, data, self)
+	declineFriendRequest(data: any, self: Client)
 	{
 		self.window.webContents.send("remove-friend-request");
 	}
 
-	// send message to contact
-	sendMessage(event, data, self)
+	// send message to friend
+	sendMessage(data: any, self: Client)
 	{
-		self.tox.sendMessage(data.contactId, data.message);
-		const contactPk = self.tox.getContactPublicKey(data.contactId);
-		storage.addMessage(contactPk, data.message, self.tox.publicKey, new Date().getTime());
+		self.tox?.sendMessage(data.contactId, data.message);
+		const contactPk = self.tox?.getContactPublicKey(data.contactId) ?? "";
+		Storage.addMessage(contactPk, data.message, self.tox?.publicKey ?? "", new Date().getTime());
 	}
 
-	// start file transfer with contact
-	sendFile(contactId, filePath, fileName, fileSize, isAvatar, self)
+	// start file transfer with friend
+	sendFile(friendId: number, filePath: string, fileName: string, fileSize: number, isAvatar: boolean, self: Client)
 	{
 		console.log("Sending file", fileName);
 
-		const fileId = self.tox.sendFile(contactId, isAvatar, fileName, fileSize);
+		const fileId = self.tox?.sendFile(friendId, isAvatar, fileName, fileSize);
 		fs.open(filePath, "r", (err, fd) =>
 		{
 			if (err)
@@ -288,27 +287,27 @@ class Client
 				return;
 			}
 
-			self.fileTransfers.push(new FileTransfer(fileId, fd, fileName, contactId, isAvatar));
+			self.fileTransfers.push(new FileTransfer(fileId ?? 0, fd, fileName, friendId, isAvatar));
 		});
 	}
 
-	friendStatusChanged(tox, id, status, userData, self)
+	friendStatusChanged(tox: any, id: number, status: ToxUserStatus, userData: any, self: Client)
 	{
 		self.window.webContents.send("friend-status-change", {id: id, status: status});
 	}
 
-	friendStatusMessageChanged(tox, id, message, length, userData, self)
+	friendStatusMessageChanged(tox: any, id: number, message: string, length: number, userData: any, self: Client)
 	{
 		self.window.webContents.send("friend-status-message-change", {id: id, statusMessage: message});
 	}
 
-	friendNameChanged(tox, id, name, length, userData, self)
+	friendNameChanged(tox: any, id: number, name: string, length: number, userData: any, self: Client)
 	{
 		self.window.webContents.send("friend-name-change", {id: id, name: name});
 	}
 
-	// friend has connected / disconnected
-	friendConnectionStatusChanged(tox, id, connectionStatus, userData, self)
+	// friend's connection status has changed
+	friendConnectionStatusChanged(tox: any, id: number, connectionStatus: ToxConnection, userData: any, self: Client)
 	{
 		self.window.webContents.send("friend-connection-status-change", {id: id, connectionStatus: connectionStatus});
 
@@ -317,7 +316,7 @@ class Client
 		if (connectionStatus > 0)
 		{
 			console.log("Sending avatar", connectionStatus, id);
-			const fileName = `${self.tox.publicKey.toUpperCase()}.png`;
+			const fileName = `${self.tox?.publicKey.toUpperCase()}.png`;
 			const filePath = path.resolve(AVATARS_SAVE_DIR, fileName);
 
 			// get avatar file size
@@ -332,14 +331,14 @@ class Client
 	}
 
 	// file transfer was initiated by friend
-	fileReceived(friendId, fileId, size, name, isAvatar)
+	fileReceived(friendId: number, fileId: number, size: number, name: string, isAvatar: boolean)
 	{
 		console.log("Incoming file transfer", name);
 
 		// reject if auto-rejection is enabled
 		if ((this.config.fileTransfers.rejectFiles && !isAvatar) || this.config.fileTransfers.rejectAvatars && isAvatar)
 		{
-			this.tox.rejectFileTransfer(friendId, fileId);
+			this.tox?.rejectFileTransfer(friendId, fileId);
 			return;
 		}
 
@@ -350,11 +349,11 @@ class Client
 			if (size > MAX_AVATAR_SIZE)
 			{
 				console.log("Incoming avatar file is too big, rejecting");
-				this.tox.rejectFileTransfer(friendId, fileId);
+				this.tox?.rejectFileTransfer(friendId, fileId);
 				return;
 			}
 
-			const contactPk = this.tox.getContactPublicKey(friendId);
+			const contactPk = this.tox?.getContactPublicKey(friendId) ?? "";
 			name = `${contactPk.toUpperCase()}.png`;
 			saveDir = AVATARS_SAVE_DIR;
 		}
@@ -366,8 +365,8 @@ class Client
 		{
 			const fd = fs.openSync(filePath, "w");
 			this.fileTransfers.push(new FileTransfer(fileId, fd, safeName, friendId, isAvatar));
-			this.tox.acceptFileTransfer(friendId, fileId);
-		} catch (err)
+			this.tox?.acceptFileTransfer(friendId, fileId);
+		} catch (err: any)
 		{
 			console.error("Error while trying to access path", err.message);
 		}
@@ -376,9 +375,9 @@ class Client
 	// received file chunk from friend
 	// order of packets is guaranteed by toxcore
 	// on final chunk length is 0 and data is null
-	fileReceivedChunk(friendId, fileId, position, data, length)
+	fileReceivedChunk(friendId: number, fileId: number, position: number, data: Buffer, length: number)
 	{
-		const index = findFileTransferIndex(this.fileTransfers, fileId, friendId);
+		const index = FileTransfer.findFileTransferIndex(this.fileTransfers, fileId, friendId);
 		if (index < 0)
 			return;
 
@@ -387,7 +386,7 @@ class Client
 			try
 			{
 				fs.writeSync(this.fileTransfers[index].fd, data, 0, length, position);
-			} catch (err)
+			} catch (err: any)
 			{
 				console.error("Error while writing to disk", err.message);
 			}
@@ -408,15 +407,15 @@ class Client
 	}
 
 	// received file control message from friend
-	fileReceivedControlMsg(friendId, fileId, messageType)
+	fileReceivedControlMsg(friendId: number, fileId: number, messageType: ToxFileControl)
 	{
-		console.log("File control message received", FileControl.enums[messageType].key);
+		console.log("File control message received", ToxFileControl[messageType]);
 
-		const index = findFileTransferIndex(this.fileTransfers, fileId, friendId);
+		const index = FileTransfer.findFileTransferIndex(this.fileTransfers, fileId, friendId);
 		if (index < 0)
 			return;
 
-		if (messageType == FileControl.TOX_FILE_CONTROL_CANCEL.value)
+		if (messageType == ToxFileControl.TOX_FILE_CONTROL_CANCEL)
 		{
 			fs.close(this.fileTransfers[index].fd, (err) =>
 			{
@@ -429,9 +428,9 @@ class Client
 	}
 
 	// received file chunk request from friend
-	fileReceivedChunkRequest(friendId, fileId, position, size)
+	fileReceivedChunkRequest(friendId: number, fileId: number, position: number, size: number)
 	{
-		const index = findFileTransferIndex(this.fileTransfers, fileId, friendId);
+		const index = FileTransfer.findFileTransferIndex(this.fileTransfers, fileId, friendId);
 		if (index < 0)
 			return;
 
@@ -441,8 +440,8 @@ class Client
 			{
 				const data = Buffer.alloc(size);
 				fs.readSync(this.fileTransfers[index].fd, data, 0, data.length, position);
-				this.tox.sendFileChunk(friendId, fileId, position, data);
-			} catch (err)
+				this.tox?.sendFileChunk(friendId, fileId, position, data);
+			} catch (err: any)
 			{
 				console.error("Error while reading from file", err.message);
 			}
@@ -460,18 +459,18 @@ class Client
 		}
 	}
 
-	// message received from our contact
-	messageReceived(tox, contactId, messageType, message, length, userData, self)
+	// message received from friend
+	messageReceived(tox: any, friendId: number, messageType: number, message: string, length: number, userData: any, self: Client)
 	{
-		const contactPk = self.tox.getContactPublicKey(contactId);
+		const contactPk = self.tox?.getContactPublicKey(friendId) ?? "";
 		const date = new Date();
 		const timestamp = date.getTime();
-		storage.addMessage(contactPk, message, contactPk, timestamp);
-		self.window.webContents.send("message", new Message(contactId, message, date));
+		Storage.addMessage(contactPk, message, contactPk, timestamp);
+		self.window.webContents.send("message", new Message(friendId, message, date));
 
 		if (!self.window.isFocused())
 		{
-			const contactName = self.tox.getContactName(contactId);
+			const contactName = self.tox?.getContactName(friendId);
 			const title = `Message from ${contactName}`;
 			let body = message;
 			if (body.length > MAX_NOTIFICATION_LENGTH)
@@ -486,29 +485,29 @@ class Client
 	/**
 	 * Gets contact data by contactId
 	 * @param {number} id contact id
-	 * @returns {Contact} contact object
+	 * @returns {Friend} contact object
 	 */
-	createContact(id)
+	createContact(id: number): Friend
 	{
-		const name = this.tox.getContactName(id);
-		const status = ToxUserStatus.TOX_USER_STATUS_NONE.value;
-		const statusMessage = this.tox.getContactStatusMessage(id);
-		const connectionStatus = ToxConnection.TOX_CONNECTION_NONE.value;
-		const pk = this.tox.getContactPublicKey(id);
-		return new Contact(id, name, status, statusMessage, connectionStatus, pk);
+		const name = this.tox?.getContactName(id) ?? "";
+		const status = ToxUserStatus.TOX_USER_STATUS_NONE;
+		const statusMessage = this.tox?.getContactStatusMessage(id) ?? "";
+		const connectionStatus = ToxConnection.TOX_CONNECTION_NONE;
+		const pk = this.tox?.getContactPublicKey(id) ?? "";
+		return new Friend(id, name, status, statusMessage, connectionStatus, pk);
 	}
 
 	// send initial data to the view
-	sendDataToRenderer(event, self)
+	sendDataToRenderer(self: Client)
 	{
-		let contacts = [];
-		self.tox.contacts.forEach((id) => contacts.push(self.createContact(id)));
+		let contacts: Friend[] = [];
+		self.tox?.contacts.forEach((id) => contacts.push(self.createContact(id)));
 
-		event.sender.send("data",
+		self.window.webContents.send("data",
 		{
-			username: self.tox.username,
-			statusMessage: self.tox.statusMessage,
-			publicKey: self.tox.publicKey,
+			username: self.tox?.username,
+			statusMessage: self.tox?.statusMessage,
+			publicKey: self.tox?.publicKey,
 			contacts: contacts,
 			avatarsSaveDir: url.pathToFileURL(AVATARS_SAVE_DIR).toString(),
 			assetsPath: path.resolve(app.getAppPath(), "assets")
@@ -516,36 +515,36 @@ class Client
 	}
 
 	// get messages from DB for specified contact
-	async loadMessages(event, contactId, amount=20, self)
+	async loadMessages(friendId: number, amount: number = 20, self: Client)
 	{
-		const contactPk = self.tox.getContactPublicKey(contactId);
-		const rows = await storage.getMessages(contactPk, amount);
+		const contactPk = self.tox?.getContactPublicKey(friendId) ?? "";
+		const rows = await Storage.getMessages(contactPk, amount);
 		const messages = rows.map(message =>
 		{
-			let newContactId = contactId;
-			if (message.owner_pk == self.tox.publicKey)
-				newContactId = -1;
+			let newFriendId = friendId;
+			if (message.owner_pk == self.tox?.publicKey)
+				newFriendId = -1;
 
-			return new Message(newContactId, message.message, new Date(message.timestamp))
+			return new Message(newFriendId, message.message, new Date(message.timestamp))
 		});
 
 		self.window.webContents.send("messages-loaded", messages);
 	}
 
-	sendFriendRequest(event, toxId, message, self)
+	sendFriendRequest(toxId: string, message: string, self: Client)
 	{
-		const contactId = self.tox.sendFriendRequest(toxId, message);
-		self.window.webContents.send("add-contact", this.createContact(contactId));
+		const friendId = self.tox?.sendFriendRequest(toxId, message) ?? 0;
+		self.window.webContents.send("add-contact", this.createContact(friendId));
 	}
 
-	removeContact(event, contactId, self)
+	removeContact(friendId: number, self: Client)
 	{
-		const success = self.tox.removeContact(contactId);
+		const success = self.tox?.removeContact(friendId);
 		if (success)
-			self.window.webContents.send("remove-contact", {id: contactId});
+			self.window.webContents.send("remove-contact", {id: friendId});
 		else
 			console.error("Error while removing contact");
 	}
 }
 
-module.exports = Client;
+export default Client;
