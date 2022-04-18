@@ -16,16 +16,25 @@ module.exports =
 	{
 		rules:
 		[
-			{
-				test: /\.css$/,
-				use:
-				[
-					{
-						loader: MiniCssExtract.loader
-					},
-					"css-loader"
-				]
-			},
+			{ oneOf: [
+				{
+					test: /\/(components|views)\/.*\.css$/,
+					use: [
+						"to-string-loader",
+						"css-loader"
+					]
+				},
+				{
+					test: /\.css$/,
+					use:
+					[
+						{
+							loader: MiniCssExtract.loader
+						},
+						"css-loader"
+					]
+				},
+			] },
 			{
 				test: /\.html$/,
 				loader: "html-loader"
@@ -43,8 +52,8 @@ module.exports =
 			},
 			{
 				test: /\.ts$/,
-				use: 'ts-loader',
-				exclude: /node_modules/,
+				use: "ts-loader",
+				exclude: /node_modules/
 			}
 		]
 	},

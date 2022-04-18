@@ -1,6 +1,6 @@
 import Component from "../component";
 import htmlTemplate from "./chatbox.html";
-import stylesheet from "!!css-loader!./chatbox.css";
+import stylesheet from "./chatbox.css";
 
 class Chatbox extends Component
 {

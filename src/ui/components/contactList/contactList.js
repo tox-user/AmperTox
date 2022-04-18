@@ -1,6 +1,6 @@
 import Component from "../component.js";
 import htmlTemplate from "./contactList.html";
-import stylesheet from "!!css-loader!./contactList.css";
+import stylesheet from "./contactList.css";
 import ContactComponent from "../contact/contact.component";
 /** @typedef {import('../../../models/contact')} Contact */
 

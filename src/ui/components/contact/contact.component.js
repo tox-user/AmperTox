@@ -1,6 +1,6 @@
 import Component from "../component.js";
 import htmlTemplate from "./contact.component.html";
-import stylesheet from "!!css-loader!./contact.component.css";
+import stylesheet from "./contact.component.css";
 import UserStatusComponent from "../userStatus/userStatus.component";
 
 class ContactComponent extends Component

@@ -1,8 +1,8 @@
 import Component from "../component";
 import htmlTemplate from "./messageThread.html";
-import stylesheet from "!!css-loader!./messageThread.css";
+import stylesheet from "./messageThread.css";
 import MessageComponent from "../message/message.component";
-import {messageDateString} from '../../dateUtils';
+import { messageDateTimeString } from '../../dateUtils';
 
 class MessageThread extends Component
 {
@@ -22,7 +22,7 @@ class MessageThread extends Component
 		nameElement.textContent = this.contact.name;
 
 		const dateElement = this.shadowRoot.querySelector(".date");
-		dateElement.textContent = messageDateString(this.date);
+		dateElement.textContent = messageDateTimeString(this.date);
 
 		const avatarsPath = sessionStorage.getItem("avatarsPath");
 		this.avatarElement.style.backgroundImage = `url(${avatarsPath}/${this.contact.publicKey.toUpperCase()}.png)`;

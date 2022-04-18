@@ -1,6 +1,6 @@
 import Component from "../component.js";
 import htmlTemplate from "./modal.component.html";
-import stylesheet from "!!css-loader!./modal.component.css";
+import stylesheet from "./modal.component.css";
 
 class ModalComponent extends Component
 {

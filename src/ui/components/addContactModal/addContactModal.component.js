@@ -1,6 +1,6 @@
 import ModalComponent from "../modal/modal.component";
 import htmlTemplate from "./addContactModal.component.html";
-import style from "!!css-loader!./addContactModal.component.css";
+import style from "./addContactModal.component.css";
 
 class AddContactModalComponent extends ModalComponent
 {

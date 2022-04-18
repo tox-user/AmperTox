@@ -1,6 +1,6 @@
 import Component from "../component";
 import htmlTemplate from "./chatlog.html";
-import stylesheet from "!!css-loader!./chatlog.css";
+import stylesheet from "./chatlog.css";
 import MessageThread from "../messageThread/messageThread";
 import {hasMinutesDifference} from '../../dateUtils';
 

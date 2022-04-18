@@ -1,6 +1,6 @@
 import Component from "../component";
 import htmlTemplate from "./sidebar.component.html";
-import stylesheet from "!!css-loader!./sidebar.component.css";
+import stylesheet from "./sidebar.component.css";
 
 class SidebarComponent extends Component
 {

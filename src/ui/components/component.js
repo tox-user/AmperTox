@@ -17,7 +17,7 @@ class Component extends HTMLElement
 		if (stylesheet != "" && stylesheet != null)
 		{
 			const styleElement = document.createElement("style");
-			styleElement.innerHTML = stylesheet.toString();
+			styleElement.appendChild(document.createTextNode(stylesheet));
 			this.shadowRoot.append(styleElement);
 		}
 

@@ -1,6 +1,6 @@
 import Component from "../component";
 import htmlTemplate from "./friendRequest.component.html";
-import stylesheet from "!!css-loader!./friendRequest.component.css";
+import stylesheet from "./friendRequest.component.css";
 
 class FriendRequestComponent extends Component
 {

@@ -1,6 +1,6 @@
 import Component from "../component";
 import htmlTemplate from "./topbar.component.html";
-import stylesheet from "!!css-loader!./topbar.component.css";
+import stylesheet from "./topbar.component.css";
 
 class TopbarComponent extends Component
 {

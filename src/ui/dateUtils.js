@@ -1,3 +1,6 @@
+const timeFormat = new Intl.DateTimeFormat([], {timeStyle: "short"});
+const dateFormat = new Intl.DateTimeFormat();
+
 /**
  * Check if two dates are the same, but without taking time into account
  * @param {Date} date1
@@ -52,13 +55,23 @@ export const hasMinutesDifference = (numMinutes, date1, date2) =>
 };
 
 /**
- * Returns a string with locale date, but exact date is only shown if it's not today or yesterday
+ * Returns a string with locale time
  * @param {Date} date
- * @returns {string} date display string
+ * @returns {string} time display string
  */
-export const messageDateString = (date) =>
+export const messageTimeString = (date) =>
 {
-	const timeString = date.toLocaleTimeString([], {timeStyle: "short"});
+	return timeFormat.format(date);
+};
+
+/**
+ * Returns a string with locale date and time, but exact date is only shown if it's not today or yesterday
+ * @param {Date} date
+ * @returns {string} datetime display string
+ */
+export const messageDateTimeString = (date) =>
+{
+	const timeString = timeFormat.format(date);
 	let dateString = "";
 
 	if (isToday(date))
@@ -66,7 +79,7 @@ export const messageDateString = (date) =>
 	else if (isYesterday(date))
 		dateString = "Yesterday";
 	else
-		dateString = date.toLocaleDateString();
+		dateString = dateFormat.format(date);
 
 	return `${dateString}, ${timeString}`;
 };

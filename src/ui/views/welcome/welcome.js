@@ -1,6 +1,6 @@
 import Component from "../../components/component";
 import htmlTemplate from "./welcome.html";
-import stylesheet from "!!css-loader!./welcome.css";
+import stylesheet from "./welcome.css";
 
 class Welcome extends Component
 {

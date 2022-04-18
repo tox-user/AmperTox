@@ -1,6 +1,6 @@
 import Component from "../../components/component";
 import htmlTemplate from "./messenger.html";
-import stylesheet from "!!css-loader!./messenger.css";
+import stylesheet from "./messenger.css";
 
 class Messenger extends Component
 {

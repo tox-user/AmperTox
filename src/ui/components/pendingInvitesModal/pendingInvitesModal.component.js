@@ -1,6 +1,6 @@
 import ModalComponent from "../modal/modal.component";
 import htmlTemplate from "./pendingInvitesModal.component.html";
-import stylesheet from "!!css-loader!./pendingInvitesModal.component.css";
+import stylesheet from "./pendingInvitesModal.component.css";
 import FriendRequestComponent from "../friendRequest/friendRequest.component";
 
 class PendingInvitesModalComponent extends ModalComponent

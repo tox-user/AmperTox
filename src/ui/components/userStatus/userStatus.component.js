@@ -1,6 +1,6 @@
 import Component from "../component";
 import htmlTemplate from "./userStatus.component.html";
-import stylesheet from "!!css-loader!./userStatus.component.css";
+import stylesheet from "./userStatus.component.css";
 import { Status, statusToString } from "../../status";
 /** @typedef {import('../../../models/contact')} Contact */
 

@@ -1,6 +1,7 @@
 import Component from "../component";
 import htmlTemplate from "./message.component.html";
-import stylesheet from "!!css-loader!./message.component.css";
+import stylesheet from "./message.component.css";
+import { messageTimeString } from "../../dateUtils";
 
 class MessageComponent extends Component
 {
@@ -15,7 +16,7 @@ class MessageComponent extends Component
 		text.innerHTML = parsedMessage;
 
 		const date = this.shadowRoot.querySelector(".date");
-		date.textContent = message.date.toLocaleTimeString([], {timeStyle: "short"});
+		date.textContent = messageTimeString(message.date);
 	}
 
 	sanitizeInput(string)
