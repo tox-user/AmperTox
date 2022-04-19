@@ -18,8 +18,14 @@ module.exports =
 		[
 			{ oneOf: [
 				{
-					test: /\/(components|views)\/.*\.css$/,
-					use: [
+					test: /\.css$/,
+					include:
+					[
+						path.resolve(__dirname, "src/ui/components"),
+						path.resolve(__dirname, "src/ui/views")
+					],
+					use:
+					[
 						"to-string-loader",
 						"css-loader"
 					]
